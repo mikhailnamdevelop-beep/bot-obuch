@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/", "destination": "https://funnel-bot-production.up.railway.app/funnel/web" },
+    { "source": "/(.*)", "destination": "https://funnel-bot-production.up.railway.app/funnel/web" }
+  ]
+}

@@ -1,0 +1,1376 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Автоматизируй что угодно</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Onest:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F4F6FB;--ink:#16131F;--ink-dim:rgba(22,19,31,.62);--ink-faint:rgba(22,19,31,.42);
+    --accent:#6366F1;--accent-2:#FB7185;--line:rgba(22,19,31,.08);
+    --graphite:rgba(28,28,38,.82);--graphite-brd:rgba(255,255,255,.12);--card-brd:rgba(255,255,255,.8);
+    --disp:'Space Grotesk',sans-serif;--body:'Inter',sans-serif;--mono:'JetBrains Mono',monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html{scroll-behavior:smooth;scroll-padding-top:96px}
+  body{background:var(--bg);color:var(--ink);font-family:var(--body);line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(circle at 20% 8%, rgba(99,102,241,.10), transparent 45%),radial-gradient(circle at 88% 2%, rgba(251,113,133,.08), transparent 42%)}
+  .navwrap{position:fixed;top:10px;left:0;right:0;z-index:100;padding:0 10px}
+  .nav{position:relative;display:flex;align-items:center;gap:6px;padding:7px 7px 7px 14px;background:var(--graphite);border:1px solid var(--graphite-brd);border-radius:16px;backdrop-filter:blur(22px) saturate(160%);-webkit-backdrop-filter:blur(22px) saturate(160%);box-shadow:0 12px 36px -10px rgba(22,19,31,.45), inset 0 1px 0 rgba(255,255,255,.14)}
+  .nav-title{display:flex;align-items:center;justify-content:center;cursor:pointer;margin-right:2px;padding:6px;border-radius:9px}
+  .nav-title:active{background:rgba(255,255,255,.12)}
+  .navmenu{display:flex;align-items:center;gap:2px;margin-left:auto}
+  .navitem{position:relative}
+  .navitem>button{font-family:var(--body);font-size:12px;font-weight:500;color:rgba(255,255,255,.72);background:none;border:none;cursor:pointer;padding:8px 9px;border-radius:10px;transition:.15s;white-space:nowrap;display:flex;align-items:center;gap:3px}
+  .navitem>button:active{background:rgba(255,255,255,.1);color:#fff}
+  .navitem.open>button{background:rgba(255,255,255,.12);color:#fff}
+  .navitem>button .chev{font-size:8px;opacity:.7}
+  .navitem{position:static}
+  .dropdown{position:absolute;top:calc(100% + 8px);left:10px;right:10px;width:auto;max-height:70vh;overflow-y:auto;background:var(--graphite);border:1px solid var(--graphite-brd);border-radius:14px;backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%);box-shadow:0 22px 50px -12px rgba(22,19,31,.55), inset 0 1px 0 rgba(255,255,255,.12);padding:6px;display:none}
+  .navitem.open .dropdown{display:block;animation:fade .18s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+  .drop-link{display:flex;gap:9px;padding:10px 10px;border-radius:10px;cursor:pointer;text-decoration:none;transition:.12s}
+  .drop-link:active{background:rgba(255,255,255,.1)}
+  .drop-num{font-family:var(--mono);font-size:10px;color:#a5a8ff;padding-top:2px;min-width:18px}
+  .drop-t{font-size:13px;font-weight:600;color:#fff;line-height:1.25;display:block}
+  .drop-d{font-size:11px;color:rgba(255,255,255,.55);line-height:1.3;margin-top:1px;display:block}
+  .stage{position:relative;z-index:1;max-width:680px;margin:0 auto;padding:78px 16px 80px}
+  .hero{padding:18px 0 30px}
+  .hero .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin-bottom:16px}
+  .hero h1{font-family:var(--disp);font-weight:700;letter-spacing:-.025em;font-size:clamp(30px,8.5vw,46px);line-height:1.04;margin-bottom:18px}
+  .hero h1 .g{background:linear-gradient(110deg,var(--accent),var(--accent-2));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .hero .sub-strong{font-size:17px;font-weight:600;color:var(--ink);margin-bottom:12px;line-height:1.4}
+  .hero .sub{font-size:15px;color:var(--ink-dim);margin-bottom:26px;max-width:520px}
+  .hero .cta-row{display:flex;flex-direction:column;gap:10px}
+  .home-h{font-family:var(--disp);font-size:13px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-faint);margin:8px 0 14px}
+  .sections{display:grid;gap:14px}
+  .scard{position:relative;border:1px solid var(--card-brd);border-radius:22px;padding:22px;background:linear-gradient(180deg,rgba(255,255,255,.62),rgba(255,255,255,.34));backdrop-filter:blur(14px) saturate(180%);-webkit-backdrop-filter:blur(14px) saturate(180%);box-shadow:0 26px 50px -26px rgba(22,19,31,.22), inset 0 1px 0 rgba(255,255,255,.85);transition:.2s;cursor:pointer}
+  .scard:active{transform:scale(.99)}
+  .scard-head{display:flex;align-items:baseline;gap:11px;margin-bottom:8px}
+  .scard-num{font-family:var(--mono);font-size:12px;color:var(--accent-2)}
+  .scard h2{font-family:var(--disp);font-size:21px;font-weight:600;letter-spacing:-.02em}
+  .scard>p{color:var(--ink-dim);font-size:14px;margin-bottom:16px}
+  .chips{display:flex;flex-wrap:wrap;gap:7px}
+  .chip{font-size:12px;color:var(--ink-dim);text-decoration:none;padding:6px 11px;border:1px solid var(--line);border-radius:999px;display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.5)}
+  .chip .n{font-family:var(--mono);font-size:10px;color:var(--accent-2)}
+
+  /* ПАПКИ (адаптация GlassIcons под светлый стиль) */
+  .folders{display:grid;grid-template-columns:repeat(3,1fr);gap:16px 10px;margin-top:4px;padding:6px 0}
+  .folder{position:relative;background:none;border:none;padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent;display:flex;flex-direction:column;align-items:center;gap:8px}
+  .folder__ic{position:relative;width:58px;height:50px;perspective:20em}
+  .folder__back,.folder__front{position:absolute;inset:0;transition:transform .3s cubic-bezier(.83,0,.17,1),box-shadow .3s;clip-path:polygon(0% 20%, 40% 20%, 48% 2%, 100% 2%, 100% 100%, 0% 100%);border-radius:5px}
+  .folder__back{background:linear-gradient(135deg,var(--accent),var(--accent-2));transform:rotate(11deg);transform-origin:100% 100%;box-shadow:0 8px 16px -6px rgba(99,102,241,.5);opacity:.9}
+  .folder__front{background:linear-gradient(160deg,rgba(255,255,255,.85),rgba(255,255,255,.5));box-shadow:0 0 0 1px rgba(255,255,255,.7) inset, 0 10px 22px -10px rgba(22,19,31,.3);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center}
+  .folder__front svg{width:22px;height:22px;stroke:var(--accent);stroke-width:1.8;fill:none;margin-top:4px}
+  .folder__label{font-size:11.5px;color:var(--ink-dim);text-align:center;line-height:1.2;font-weight:500;max-width:76px}
+  .folder__num{font-family:var(--mono);font-size:9px;color:var(--accent-2);display:block;margin-bottom:1px}
+  .folder:active .folder__front,.folder:hover .folder__front{transform:translateY(-3px);box-shadow:0 0 0 1px rgba(255,255,255,.9) inset, 0 16px 26px -10px rgba(99,102,241,.45)}
+  .folder:active .folder__back,.folder:hover .folder__back{transform:rotate(17deg) translate(-3px,-3px)}
+  .folder:active .folder__label,.folder:hover .folder__label{color:var(--accent)}
+  .scard .open{margin-top:18px;display:inline-flex;align-items:center;gap:8px;font-weight:600;font-size:14px;color:var(--ink);border:none;background:none;font-family:var(--body);cursor:pointer}
+  .scard .open .arr{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:13px;background:linear-gradient(135deg,var(--accent),var(--accent-2))}
+  .article{display:block;margin-bottom:8px}
+  .page-library{display:none}
+  .page-library.show{display:block}
+  .back{display:inline-flex;align-items:center;gap:7px;cursor:pointer;background:none;border:none;color:var(--ink-dim);font-family:var(--body);font-size:14px;margin-bottom:18px;padding:6px 0}
+  .a-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:12px}
+  .article h1{font-family:var(--disp);font-size:clamp(26px,7vw,38px);font-weight:700;letter-spacing:-.02em;line-height:1.06;margin-bottom:14px}
+  .article>.lead{font-size:16px;color:var(--ink-dim);margin-bottom:20px}
+  .minitoc{border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:26px;background:rgba(255,255,255,.5);backdrop-filter:blur(10px)}
+  .minitoc .ttl{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:10px}
+  .minitoc a{display:flex;gap:9px;padding:8px 8px;border-radius:10px;text-decoration:none;color:var(--ink);transition:.12s;align-items:flex-start}
+  .minitoc a:active{background:rgba(99,102,241,.1)}
+  .minitoc a .mn{font-family:var(--mono);font-size:11px;color:var(--accent-2);padding-top:2px;min-width:20px}
+  .minitoc a .mt{font-size:14px;font-weight:600;line-height:1.3;display:block}
+  .minitoc a .md{font-size:12px;color:var(--ink-faint);line-height:1.3;margin-top:1px;display:block}
+  .sec{scroll-margin-top:96px;padding:24px 0;border-top:1px solid var(--line)}
+  .lm-head{display:flex;align-items:center;gap:12px;padding:12px 14px;margin-bottom:12px;border:1px solid rgba(99,102,241,.25);border-radius:14px;background:linear-gradient(135deg,rgba(99,102,241,.1),rgba(251,113,133,.06))}
+  .lm-badge{flex:0 0 auto;width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-family:var(--mono);font-size:14px;font-weight:600;color:#fff;background:linear-gradient(135deg,var(--accent),var(--accent-2));box-shadow:0 6px 14px -4px rgba(99,102,241,.5)}
+  .lm-head h3{margin:0;font-family:var(--disp);font-size:19px;font-weight:600;letter-spacing:-.015em;line-height:1.2}
+  .sec h3{font-family:var(--disp);font-size:20px;font-weight:600;letter-spacing:-.015em;margin-bottom:5px}
+  .sec .ssub{color:var(--ink-faint);font-size:13px;margin-bottom:15px}
+  .sec ul{list-style:none;display:grid;gap:9px}
+  .sec li{position:relative;padding-left:21px;color:var(--ink-dim);font-size:14.5px}
+  .sec li::before{content:"";position:absolute;left:0;top:9px;width:6px;height:6px;border-radius:2px;background:linear-gradient(135deg,var(--accent),var(--accent-2))}
+  .sec li b{color:var(--ink);font-weight:600}
+  .sec p{color:var(--ink-dim);font-size:14.5px;margin:10px 0}
+  .sec code{font-family:var(--mono);font-size:12.5px;background:rgba(99,102,241,.1);color:var(--accent);padding:1px 6px;border-radius:5px}
+  .sec .quote{margin:14px 0;padding:12px 15px;border-left:3px solid var(--accent);background:rgba(99,102,241,.06);border-radius:0 10px 10px 0;color:var(--ink);font-size:14px}
+  .prompt{border:1px solid var(--line);border-radius:13px;margin:8px 0;background:rgba(255,255,255,.55);overflow:hidden}
+  .prompt summary{list-style:none;cursor:pointer;padding:13px 15px;display:flex;align-items:center;gap:10px;font-weight:600;font-size:14px;color:var(--ink)}
+  .prompt summary::-webkit-details-marker{display:none}
+  .prompt summary .pq{font-family:var(--mono);font-size:11px;color:var(--accent-2);min-width:30px}
+  .prompt summary .pchev{margin-left:auto;font-size:11px;color:var(--ink-faint);transition:.2s}
+  .prompt[open] summary .pchev{transform:rotate(180deg)}
+  .prompt .pbody{padding:0 15px 15px}
+  .prompt .goal{font-size:13.5px;color:var(--ink-dim);margin-bottom:10px}
+  .prompt .goal b{color:var(--ink)}
+  .codewrap{position:relative}
+  .prompt pre{background:#1c1c26;color:#e8e8f0;border-radius:10px;padding:13px;font-family:var(--mono);font-size:12px;line-height:1.5;overflow-x:auto;white-space:pre-wrap;word-break:break-word}
+  .copy-btn{margin-top:8px;width:100%;padding:9px;border-radius:9px;border:1px solid var(--line);background:rgba(99,102,241,.08);color:var(--accent);font-family:var(--body);font-weight:600;font-size:13px;cursor:pointer}
+  .copy-btn:active{background:rgba(99,102,241,.18)}
+  .prompt .out{font-size:13px;color:var(--ink-dim);margin-top:11px;padding-top:11px;border-top:1px dashed var(--line)}
+  .prompt .out b{color:var(--ink)}
+  .catttl{font-family:var(--disp);font-size:15px;font-weight:600;color:var(--accent);margin:22px 0 4px;letter-spacing:-.01em}
+  .offer{margin-top:16px;padding:18px;border-radius:16px;background:linear-gradient(135deg,rgba(99,102,241,.12),rgba(251,113,133,.07));border:1px solid rgba(99,102,241,.2)}
+  .offer .tag{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent-2);margin-bottom:7px}
+  .offer p{color:var(--ink);font-size:14px;margin-bottom:14px}
+  .offer p b{color:var(--accent)}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;width:100%;font-family:var(--body);font-weight:600;font-size:15px;text-decoration:none;padding:14px 22px;border-radius:14px;border:none;transition:.15s}
+  .btn:active{transform:scale(.98)}
+  .btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#fff;box-shadow:0 12px 26px -10px rgba(99,102,241,.55)}
+  .btn-ghost{background:rgba(255,255,255,.65);color:var(--ink);border:1px solid var(--card-brd);backdrop-filter:blur(10px)}
+  .endcta{margin-top:28px;padding:24px 20px;border-radius:20px;text-align:center;background:linear-gradient(135deg,rgba(99,102,241,.12),rgba(251,113,133,.07));border:1px solid rgba(99,102,241,.18)}
+  .endcta h4{font-family:var(--disp);font-size:20px;font-weight:600;margin-bottom:8px}
+  .endcta p{color:var(--ink-dim);font-size:14px;margin-bottom:18px}
+  .imgph{border:1px dashed var(--line);border-radius:14px;padding:26px 16px;text-align:center;color:var(--ink-faint);font-size:13px;margin:14px 0;background:rgba(255,255,255,.4)}
+  .infographic{margin:16px 0;border-radius:16px;overflow:hidden;border:1px solid var(--card-brd);box-shadow:0 20px 44px -24px rgba(22,19,31,.28);background:#fff}
+  .infographic img{display:block;width:100%;height:auto;cursor:zoom-in}
+  .infocap{font-size:12px;color:var(--ink-faint);text-align:center;margin:8px 0 0;padding:0 4px}
+  .lightbox{position:fixed;inset:0;z-index:200;background:rgba(10,10,15,.94);display:none;align-items:center;justify-content:center;padding:12px;overflow:hidden;touch-action:none}
+  .lightbox.on{display:flex}
+  .lightbox img{max-width:100%;max-height:90vh;width:auto;height:auto;border-radius:10px;box-shadow:0 20px 60px rgba(0,0,0,.5);transform-origin:center center;touch-action:none;will-change:transform;-webkit-user-select:none;user-select:none;-webkit-user-drag:none}
+  .lightbox .lx-close{position:fixed;top:14px;right:16px;width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,.25);background:rgba(28,28,38,.8);color:#fff;font-size:20px;cursor:pointer;display:grid;place-items:center;z-index:201}
+  .lightbox .lx-hint{position:fixed;bottom:16px;left:0;right:0;text-align:center;color:rgba(255,255,255,.6);font-size:12px;font-family:var(--mono)}
+  .page-offer{display:none}
+  .page-offer.show{display:block}
+  .lib-title{margin-bottom:14px}
+  .lm-anchor{position:relative;top:-88px;height:0;visibility:hidden}
+  .lib-toc{background:linear-gradient(135deg,rgba(99,102,241,.1),rgba(251,113,133,.06));border-color:rgba(99,102,241,.2)}
+  .cond{border:1px solid rgba(99,102,241,.22);border-radius:18px;padding:20px;margin-bottom:24px;background:linear-gradient(135deg,rgba(99,102,241,.1),rgba(251,113,133,.06))}
+  .cond .ct{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-2);margin-bottom:9px}
+  .cond h2{font-family:var(--disp);font-size:21px;font-weight:600;line-height:1.2;margin-bottom:10px}
+  .cond p{font-size:14.5px;color:var(--ink-dim)}
+  .cond .frame{margin-top:13px;padding:13px 15px;border-radius:12px;background:rgba(255,255,255,.6);border:1px solid var(--line);font-size:14px;color:var(--ink)}
+  .cond .frame b{color:var(--accent)}
+  .ss-label{font-family:var(--disp);font-size:13px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-faint);margin:6px 0 4px}
+  .scroll-stack{position:relative}
+  .ss-item{position:sticky;top:90px;margin-bottom:18px}
+  .ss-card{border-radius:22px;padding:24px;border:1px solid var(--card-brd);background:linear-gradient(180deg,rgba(255,255,255,.9),rgba(255,255,255,.78));backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);box-shadow:0 30px 60px -24px rgba(22,19,31,.32), inset 0 1px 0 rgba(255,255,255,.9)}
+  .ss-card.sell{background:linear-gradient(150deg,#1c1c26,#272736);color:#fff;border:1px solid rgba(255,255,255,.12)}
+  .ss-card.bonus{background:linear-gradient(150deg,rgba(99,102,241,.16),rgba(251,113,133,.12));border:1px solid rgba(99,102,241,.25)}
+  .ss-kicker{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:10px;color:var(--accent-2)}
+  .ss-card.sell .ss-kicker{color:#a5a8ff}
+  .ss-card h3{font-family:var(--disp);font-size:22px;font-weight:600;letter-spacing:-.02em;margin-bottom:6px;line-height:1.15}
+  .ss-card .day{font-family:var(--mono);font-size:11px;color:var(--accent);margin-bottom:8px}
+  .ss-card .promise{font-size:14.5px;color:var(--ink-dim);margin-bottom:14px}
+  .ss-card.sell .promise{color:rgba(255,255,255,.75)}
+  .ss-card ul{list-style:none;display:grid;gap:8px;margin-bottom:6px}
+  .ss-card li{position:relative;padding-left:20px;font-size:14px;color:var(--ink-dim)}
+  .ss-card li::before{content:"";position:absolute;left:0;top:8px;width:6px;height:6px;border-radius:50%;background:var(--accent)}
+  .ss-card.sell li{color:rgba(255,255,255,.82)}.ss-card.sell li::before{background:#a5a8ff}
+  .ss-card.bonus li::before{background:var(--accent-2)}
+  .ss-card .res{margin-top:12px;padding-top:12px;border-top:1px dashed var(--line);font-size:13.5px;color:var(--ink)}
+  .ss-card.sell .res{border-top-color:rgba(255,255,255,.18);color:#fff}
+  .ss-card .res b{color:var(--accent)}
+  .ss-price{display:flex;align-items:baseline;gap:10px;margin:14px 0}
+  .ss-price .old{font-size:18px;color:rgba(255,255,255,.4);text-decoration:line-through}
+  .ss-price .new{font-family:var(--disp);font-size:34px;font-weight:700;color:#fff}
+  .ss-price .tag{font-size:12px;color:#a5a8ff;font-family:var(--mono)}
+
+  /* горизонтальный слайдер программы */
+  .hslider{margin:6px -16px 0;padding:4px 0}
+  .htrack{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;padding:8px 16px 14px;scrollbar-width:none}
+  .htrack::-webkit-scrollbar{display:none}
+  .hslide{flex:0 0 84%;scroll-snap-align:center;max-width:420px}
+  .hcard{height:100%;border-radius:22px;padding:22px;border:1px solid var(--card-brd);background:linear-gradient(180deg,rgba(255,255,255,.92),rgba(255,255,255,.8));backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);box-shadow:0 22px 46px -24px rgba(22,19,31,.3), inset 0 1px 0 rgba(255,255,255,.9)}
+  .hcard.sell{background:linear-gradient(150deg,#1c1c26,#272736);color:#fff;border:1px solid rgba(255,255,255,.12)}
+  .hcard.bonus{background:linear-gradient(150deg,rgba(99,102,241,.16),rgba(251,113,133,.12));border:1px solid rgba(99,102,241,.25)}
+  .hcard.final{background:linear-gradient(150deg,rgba(99,102,241,.2),rgba(251,113,133,.14));border:1px solid rgba(99,102,241,.32);display:flex;flex-direction:column}
+  .hc-kicker{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:10px;color:var(--accent-2)}
+  .hcard.sell .hc-kicker{color:#a5a8ff}
+  .hcard h3{font-family:var(--disp);font-size:20px;font-weight:600;letter-spacing:-.02em;margin-bottom:6px;line-height:1.15}
+  .hcard .day{font-family:var(--mono);font-size:11px;color:var(--accent);margin-bottom:8px}
+  .hcard .promise{font-size:14px;color:var(--ink-dim);margin-bottom:12px}
+  .hcard.sell .promise{color:rgba(255,255,255,.78)}
+  .hcard.final .promise b{color:var(--accent)}
+  .hcard ul{list-style:none;display:grid;gap:7px;margin-bottom:4px}
+  .hcard li{position:relative;padding-left:19px;font-size:13.5px;color:var(--ink-dim)}
+  .hcard li::before{content:"";position:absolute;left:0;top:8px;width:6px;height:6px;border-radius:50%;background:var(--accent)}
+  .hcard.sell li{color:rgba(255,255,255,.82)}.hcard.sell li::before{background:#a5a8ff}
+  .hcard.bonus li::before{background:var(--accent-2)}
+  .hcard .res{margin-top:11px;padding-top:11px;border-top:1px dashed var(--line);font-size:13px;color:var(--ink)}
+  .hcard .res b{color:var(--accent)}
+  .hcard .ss-price{margin-top:auto;padding-top:8px}
+  .final-btns{margin-top:auto;display:grid;gap:10px;padding-top:6px}
+  .hdots{display:flex;justify-content:center;gap:7px;margin:4px 0 6px;flex-wrap:wrap}
+  .hdots button{width:8px;height:8px;border-radius:50%;border:none;background:rgba(22,19,31,.18);cursor:pointer;padding:0;transition:.2s}
+  .hdots button.on{background:linear-gradient(135deg,var(--accent),var(--accent-2));width:22px;border-radius:4px}
+
+  /* слайдер картинок (для наборов фото из папки) */
+  .imgslider{margin:16px -16px}
+  .imgtrack{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;padding:2px 16px 4px;scrollbar-width:none}
+  .imgtrack::-webkit-scrollbar{display:none}
+  .imgslide{flex:0 0 88%;max-width:520px;scroll-snap-align:center}
+  .imgslide figure{margin:0;border-radius:16px;overflow:hidden;border:1px solid var(--card-brd);box-shadow:0 20px 44px -24px rgba(22,19,31,.28);background:#fff}
+  .imgslide img{display:block;width:100%;height:auto;cursor:zoom-in}
+  .imgcap{font-size:12px;color:var(--ink-faint);text-align:center;margin:8px 0 0;padding:0 16px}
+  .imgdots{display:flex;justify-content:center;gap:7px;margin:10px 0 2px;flex-wrap:wrap}
+  .imgdots button{width:8px;height:8px;border-radius:50%;border:none;background:rgba(22,19,31,.18);cursor:pointer;padding:0;transition:.2s}
+  .imgdots button.on{background:linear-gradient(135deg,var(--accent),var(--accent-2));width:22px;border-radius:4px}
+  @media(min-width:560px){.imgslide{flex-basis:70%}}
+
+  /* чередование фона гайдов: графит / светлый */
+  .sec.g-graphite, .sec.g-light{border-top:none;border-radius:20px;padding:22px 18px;margin:16px 0}
+  .sec.g-light{background:linear-gradient(180deg,rgba(255,255,255,.72),rgba(255,255,255,.42));border:1px solid var(--card-brd);box-shadow:0 20px 44px -30px rgba(22,19,31,.22)}
+  .sec.g-graphite{background:linear-gradient(150deg,#1c1c26,#272736);border:1px solid rgba(255,255,255,.1);color:#fff;box-shadow:0 22px 50px -28px rgba(22,19,31,.55)}
+  /* тёмная секция: светлый текст */
+  .sec.g-graphite h3, .sec.g-graphite .lm-head h3{color:#fff}
+  .sec.g-graphite p, .sec.g-graphite li{color:rgba(255,255,255,.82)}
+  .sec.g-graphite li b, .sec.g-graphite p b{color:#fff}
+  .sec.g-graphite .ssub{color:rgba(255,255,255,.5)}
+  .sec.g-graphite .quote{color:#fff;background:rgba(255,255,255,.06);border-left-color:#a5a8ff}
+  .sec.g-graphite code{background:rgba(255,255,255,.12);color:#c9c9ff}
+  .sec.g-graphite .infocap, .sec.g-graphite .imgcap{color:rgba(255,255,255,.5)}
+  .sec.g-graphite .lm-head{background:linear-gradient(135deg,rgba(99,102,241,.28),rgba(251,113,133,.16));border-color:rgba(255,255,255,.14)}
+  .sec.g-graphite li::before{background:linear-gradient(135deg,#a5a8ff,#fb7185)}
+  /* оффер и промт-карточки на тёмной секции — читаемые */
+  .sec.g-graphite .offer{background:linear-gradient(135deg,rgba(124,92,255,.24),rgba(251,113,133,.15));border-color:rgba(255,255,255,.2)}
+  .sec.g-graphite .offer p{color:#fff}
+  .sec.g-graphite .offer p b{color:#fff}
+  .sec.g-graphite .offer .tag{color:#c9c9ff}
+  .sec.g-graphite .prompt summary{color:var(--ink)}
+  .sec.g-graphite .catttl{color:#c9c9ff}
+
+  /* оффер: коверфлоу-слайдер программы (порт CircularTestimonials) */
+  .cc{width:100%;max-width:640px;margin:8px auto 0}
+  .cc-grid{display:block}
+  .cc-stage{position:relative;width:100%;aspect-ratio:1/1;perspective:1000px;margin-bottom:20px}
+  .cc-vis{position:absolute;inset:0;border-radius:18px;overflow:hidden;box-shadow:0 16px 40px -12px rgba(22,19,31,.45);will-change:transform,opacity;transition:transform .7s cubic-bezier(.4,2,.3,1),opacity .7s}
+  .cc-vis img{width:100%;height:100%;object-fit:cover;display:block;cursor:zoom-in}
+  .cc-vis.cc-ph{display:grid;place-items:center;background:linear-gradient(150deg,#1c1c26,#2b2b3d);border:1px solid rgba(255,255,255,.12)}
+  .cc-vis.cc-ph span{font-family:var(--disp);font-size:32px;font-weight:700;background:linear-gradient(120deg,#a5a8ff,#fb7185);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .cc-content{text-align:left;min-width:0}
+  .cc-name{font-family:var(--disp);font-weight:700;font-size:20px;line-height:1.2;color:var(--ink);margin-bottom:6px}
+  .cc-desig{font-family:var(--mono);font-size:12px;letter-spacing:.04em;color:var(--accent-2);margin-bottom:14px}
+  .cc-quote{font-size:15.5px;line-height:1.7;color:var(--ink-dim);min-height:4.6em}
+  .cc-word{display:inline-block;animation:ccBlur .35s both}
+  @keyframes ccBlur{from{filter:blur(10px);opacity:0;transform:translateY(5px)}to{filter:blur(0);opacity:1;transform:translateY(0)}}
+  .cc-arrows{display:flex;align-items:center;gap:14px;margin-top:18px}
+  .cc-arrow{width:44px;height:44px;border-radius:50%;border:none;cursor:pointer;display:grid;place-items:center;background:var(--graphite);transition:background .25s,transform .15s}
+  .cc-arrow:hover{background:var(--accent)}
+  .cc-arrow:active{transform:scale(.92)}
+  .cc-arrow svg{width:20px;height:20px;stroke:#fff;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+  .cc-progress{margin-left:auto;font-family:var(--mono);font-size:13px;color:var(--ink-faint)}
+  .cc-slide-btns{display:flex;flex-direction:column;gap:10px;margin-top:14px}
+  @media(min-width:640px){
+    .cc-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center}
+    .cc-stage{margin-bottom:0}
+  }
+
+  /* Кто мы */
+  .whoami{margin-top:34px}
+  .wh-h{font-family:var(--disp);font-size:24px;font-weight:700;letter-spacing:-.02em;margin-bottom:16px}
+  .wh-grid{display:grid;gap:14px}
+  .wh-card{border-radius:20px;padding:22px;border:1px solid var(--card-brd);background:linear-gradient(180deg,rgba(255,255,255,.7),rgba(255,255,255,.44));backdrop-filter:blur(12px) saturate(180%);-webkit-backdrop-filter:blur(12px) saturate(180%);box-shadow:0 20px 40px -24px rgba(22,19,31,.24), inset 0 1px 0 rgba(255,255,255,.85)}
+  .wh-avatar{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;font-family:var(--disp);font-size:26px;font-weight:700;color:#fff;background:linear-gradient(135deg,var(--accent),#8b8ef8);margin-bottom:14px;box-shadow:0 8px 20px -6px rgba(99,102,241,.5)}
+  .wh-avatar.alt{background:linear-gradient(135deg,var(--accent-2),#ff9db0);box-shadow:0 8px 20px -6px rgba(251,113,133,.5)}
+  .wh-name{font-family:var(--disp);font-size:20px;font-weight:600}
+  .wh-role{font-size:13px;color:var(--accent);margin-bottom:14px;font-weight:500}
+  .wh-list{list-style:none;display:grid;gap:9px}
+  .wh-list li{position:relative;padding-left:20px;font-size:14px;color:var(--ink-dim)}
+  .wh-list li::before{content:"";position:absolute;left:0;top:8px;width:6px;height:6px;border-radius:2px;background:linear-gradient(135deg,var(--accent),var(--accent-2))}
+  .wh-list li b{color:var(--ink)}
+
+  /* О нас */
+  .about{margin-top:30px;padding:24px;border-radius:20px;background:linear-gradient(135deg,rgba(99,102,241,.1),rgba(251,113,133,.06));border:1px solid rgba(99,102,241,.2)}
+  .ab-h{font-family:var(--disp);font-size:22px;font-weight:700;letter-spacing:-.02em;margin-bottom:12px}
+  .about p{font-size:14.5px;color:var(--ink-dim);margin-bottom:12px}
+  .about p b{color:var(--ink)}
+  .about .btn{margin-top:8px}
+  .about-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:16px 0}
+  .astat{text-align:center;padding:14px 8px;border-radius:14px;background:rgba(255,255,255,.55);border:1px solid var(--card-brd)}
+  .astat-n{display:block;font-family:var(--disp);font-size:22px;font-weight:700;background:linear-gradient(120deg,var(--accent),var(--accent-2));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .astat-l{display:block;font-size:11px;color:var(--ink-dim);margin-top:3px;line-height:1.25}
+
+  @media(min-width:560px){.hero .cta-row{flex-direction:row}.btn{width:auto}.nav-title{font-size:15px}.navitem>button{font-size:13px;padding:8px 11px}.hslide{flex-basis:60%}.wh-grid{grid-template-columns:1fr 1fr}.final-btns{grid-auto-flow:column}}
+
+  /* ---- Папки-иконки (GlassIcons, адаптир. под светлую тему) ---- */
+  .glass-folders{display:grid;grid-template-columns:repeat(3,1fr);gap:14px 8px;margin:6px 0 4px;padding:6px 0 2px}
+  .folder{position:relative;background:none;border:none;padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent;display:flex;flex-direction:column;align-items:center;gap:8px}
+  .folder__btn{position:relative;width:64px;height:64px;perspective:24em;transform-style:preserve-3d}
+  .folder__back,.folder__front{position:absolute;inset:0;border-radius:16px;transition:opacity .3s cubic-bezier(.83,0,.17,1),transform .3s cubic-bezier(.83,0,.17,1)}
+  .folder__back{transform:rotate(15deg);transform-origin:100% 100%;box-shadow:.4em -.4em .6em rgba(22,19,31,.18);will-change:transform}
+  .folder__front{display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.28);box-shadow:0 0 0 1.5px rgba(255,255,255,.55) inset, 0 8px 18px -8px rgba(22,19,31,.25);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);transform-origin:80% 50%;will-change:transform;color:#fff}
+  .folder__front svg{width:26px;height:26px;stroke:#fff;stroke-width:2;fill:none;filter:drop-shadow(0 1px 2px rgba(22,19,31,.25))}
+  .folder__label{font-size:12px;font-weight:600;color:var(--ink);text-align:center;line-height:1.2;max-width:92px}
+  .folder__num{font-family:var(--mono);font-size:10px;color:var(--ink-faint)}
+  .folder:hover .folder__back,.folder:focus-visible .folder__back{transform:rotate(25deg) translate3d(-.4em,-.4em,.5em)}
+  .folder:hover .folder__front,.folder:focus-visible .folder__front{transform:translate3d(0,0,1.4em)}
+  .folder:active .folder__front{transform:translate3d(0,0,.8em) scale(.96)}
+  /* цвета папок */
+  .fc-indigo .folder__back{background:linear-gradient(hsl(238,84%,62%),hsl(243,75%,58%))}
+  .fc-coral  .folder__back{background:linear-gradient(hsl(351,95%,71%),hsl(345,85%,66%))}
+  .fc-violet .folder__back{background:linear-gradient(hsl(258,70%,66%),hsl(248,70%,60%))}
+  .fc-sky    .folder__back{background:linear-gradient(hsl(205,90%,60%),hsl(215,85%,58%))}
+  .fc-teal   .folder__back{background:linear-gradient(hsl(172,66%,45%),hsl(182,66%,42%))}
+  .fc-amber  .folder__back{background:linear-gradient(hsl(38,92%,58%),hsl(28,90%,55%))}
+  @media(min-width:560px){.glass-folders{gap:18px}.folder__btn{width:70px;height:70px}}
+
+  /* ══════════════════════════════════════════════════════════════════════
+     Ai47 GLASS THEME — адаптация под единый стиль (см. style-guide.css).
+     Слой поверх: разметка и JS не менялись, логика сохранена.
+     Цвета папок (.fc-*) намеренно НЕ переопределяются.
+     ══════════════════════════════════════════════════════════════════════ */
+  :root{
+    color-scheme:dark;
+    --bg:#02070C;
+    --ink:rgba(244,250,255,.94);
+    --ink-dim:rgba(190,205,216,.72);
+    --ink-faint:rgba(126,139,163,.74);
+    --accent:#8BC9FF;
+    --accent-2:#BFE8FF;
+    --line:rgba(214,239,255,.14);
+    --graphite:rgba(4,11,18,.72);
+    --graphite-brd:rgba(215,236,250,.13);
+    --card-brd:rgba(220,242,255,.14);
+    --disp:'Space Grotesk','Onest',sans-serif;
+    --body:'Onest',system-ui,sans-serif;
+    --g-edge:linear-gradient(180deg,rgba(255,255,255,.45) 0%,rgba(255,255,255,.15) 20%,transparent 40%,transparent 60%,rgba(255,255,255,.15) 80%,rgba(255,255,255,.45) 100%);
+    --g-edge-soft:linear-gradient(180deg,rgba(255,255,255,.34) 0%,rgba(255,255,255,.10) 20%,transparent 42%,transparent 58%,rgba(255,255,255,.10) 80%,rgba(255,255,255,.34) 100%);
+  }
+  html{background:var(--bg)}
+  body{background:var(--bg);color:var(--ink);text-rendering:geometricPrecision}
+  body::before{display:none}
+
+  /* Космический фон страницы. z-index:-1 — фон УХОДИТ ЗА весь контент, поэтому
+     не нужно поднимать каждый элемент через z-index:1 (это правило роняло
+     навигацию z-index:100 и лайтбокс z-index:200 из-за высокой специфичности). */
+  .site-bg{position:absolute;left:0;top:0;width:100%;height:var(--page-height,100vh);min-height:100vh;z-index:-1;pointer-events:none;overflow:hidden}
+  .site-bg::before{content:"";position:absolute;inset:0;opacity:.96;
+    background-image:linear-gradient(180deg,rgba(1,5,9,.14) 0%,rgba(3,12,19,.30) 34%,rgba(1,5,9,.68) 100%),url("img/bg-cosmic-mesh.jpg");
+    background-repeat:no-repeat,no-repeat;background-position:center top,center top;background-size:100% 100%,cover}
+  .site-bg::after{content:"";position:absolute;inset:0;
+    background:radial-gradient(760px 430px at 50% 9%,rgba(130,205,255,.16),transparent 66%),
+               linear-gradient(180deg,rgba(0,0,0,.08),rgba(0,0,0,.22) 42%,rgba(0,0,0,.58))}
+
+  /* Типографика */
+  .hero h1,.article h1,.scard h2,.sec h3,.lm-head h3,.ss-card h3,.hcard h3,
+  .cond h2,.wh-h,.wh-name,.ab-h,.endcta h4{color:var(--ink);font-weight:600;letter-spacing:-.02em}
+  .hero h1{font-weight:500;letter-spacing:-1.5px;text-shadow:0 18px 54px rgba(0,0,0,.42)}
+  .hero h1 .g,.astat-n{background:linear-gradient(120deg,#EAF6FF 0%,#9AD8FF 46%,#6CB7E8 100%);
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .hero .eyebrow,.a-eyebrow{color:rgba(172,211,235,.72);letter-spacing:2.6px}
+  .hero .sub-strong{color:var(--ink)}
+  .hero .sub,.scard>p,.sec p,.sec li,.ss-card .promise,.hcard .promise,
+  .cond p,.about p,.wh-list li,.article>.lead{color:var(--ink-dim)}
+  .home-h,.ss-label,.infocap,.imgcap,.sec .ssub{color:var(--ink-faint)}
+  .sec li b,.sec p b,.about p b,.wh-list li b,.offer p b{color:var(--ink)}
+
+  /* Материал «жидкое стекло».
+     ВАЖНО про производительность: размытие фона стоит дорого, а вложенное
+     размытие (карточка внутри уже размытой секции) визуально почти не заметно.
+     Поэтому blur только у внешних контейнеров, вложенные — просто полупрозрачные. */
+  .scard,.minitoc,.prompt,.ss-card,.hcard,.wh-card,.infographic,
+  .imgslide figure,.astat,.cond,.about,.endcta,.offer,.lm-head,.imgph,
+  .sec.g-light,.sec.g-graphite{
+    position:relative;overflow:hidden;border:0;
+    background:rgba(255,255,255,.012);
+    box-shadow:4px 4px 4px rgba(0,0,0,.05),inset 0 1px 1px rgba(255,255,255,.15);
+  }
+  /* размытие — только внешние контейнеры */
+  .scard,.sec.g-light,.sec.g-graphite,.ss-card,.hcard,.wh-card,.about,.cond,.endcta{
+    backdrop-filter:blur(24px) saturate(124%);-webkit-backdrop-filter:blur(24px) saturate(124%)}
+  .scard::before,.minitoc::before,.prompt::before,.ss-card::before,.hcard::before,
+  .wh-card::before,.infographic::before,.imgslide figure::before,.astat::before,
+  .cond::before,.about::before,.endcta::before,.offer::before,.lm-head::before,
+  .imgph::before,.sec.g-light::before,.sec.g-graphite::before{
+    content:"";position:absolute;inset:0;z-index:0;pointer-events:none;padding:1.4px;
+    border-radius:inherit;background:var(--g-edge);
+    -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor;mask-composite:exclude}
+  .scard>*,.minitoc>*,.prompt>*,.ss-card>*,.hcard>*,.wh-card>*,.astat>*,
+  .cond>*,.about>*,.endcta>*,.offer>*,.lm-head>*,.sec.g-light>*,.sec.g-graphite>*{
+    position:relative;z-index:1}
+
+  /* Мягкое стекло — мелкие элементы (без размытия, они внутри размытых секций) */
+  .chip,.astat,.imgph,.minitoc,.cond .frame{
+    background:rgba(255,255,255,.028);
+    box-shadow:inset 0 1px 1px rgba(255,255,255,.07)}
+  /* гасим унаследованное размытие у вложенных элементов — экономия для мобильных */
+  .minitoc,.btn-ghost{backdrop-filter:none;-webkit-backdrop-filter:none}
+  .chip{color:var(--ink-dim);border:1px solid var(--line)}
+  .cond .frame{border:1px solid var(--line);color:var(--ink);border-radius:12px}
+
+  /* Чередование гайдов сохранено: светлее / глубже */
+  .sec.g-light{background:rgba(255,255,255,.022)}
+  .sec.g-graphite{background:rgba(255,255,255,.006);color:var(--ink)}
+  .sec.g-graphite h3,.sec.g-graphite .lm-head h3{color:var(--ink)}
+  .sec.g-graphite p,.sec.g-graphite li{color:var(--ink-dim)}
+  .sec.g-graphite li b,.sec.g-graphite p b{color:var(--ink)}
+  .sec.g-graphite .ssub,.sec.g-graphite .infocap,.sec.g-graphite .imgcap{color:var(--ink-faint)}
+  .sec.g-graphite .quote{color:var(--ink);background:rgba(255,255,255,.05);border-left-color:var(--accent)}
+  .sec.g-graphite code{background:rgba(139,201,255,.14);color:var(--accent-2)}
+  .sec.g-graphite .lm-head{background:rgba(255,255,255,.02);border-color:transparent}
+  .sec.g-graphite li::before,.sec li::before,.wh-list li::before,
+  .ss-card li::before,.hcard li::before{background:linear-gradient(135deg,#EAF6FF,#6CB7E8)}
+  .sec.g-graphite .offer{background:rgba(255,255,255,.02)}
+  .sec.g-graphite .offer p,.sec.g-graphite .offer p b{color:var(--ink)}
+  .sec.g-graphite .offer .tag,.sec.g-graphite .catttl{color:var(--accent-2)}
+  .sec.g-graphite .prompt summary{color:var(--ink)}
+
+  /* Акценты и мелочи */
+  .sec .quote{background:rgba(139,201,255,.07);border-left-color:var(--accent);color:var(--ink)}
+  .sec code{background:rgba(139,201,255,.12);color:var(--accent-2)}
+  .catttl,.wh-role,.ss-card .day,.hcard .day{color:var(--accent)}
+  .scard-num,.chip .n,.drop-num,.minitoc a .mn,.offer .tag,.cond .ct,
+  .ss-kicker,.hc-kicker,.cc-desig,.folder__num{color:var(--accent-2)}
+  .prompt summary,.minitoc a,.scard .open,.back{color:var(--ink)}
+  .prompt summary .pq{color:var(--accent-2)}
+  .prompt .goal,.prompt .out{color:var(--ink-dim)}
+  .prompt .goal b,.prompt .out b,.ss-card .res,.hcard .res{color:var(--ink)}
+  .prompt pre{background:rgba(0,0,0,.42);color:#EAF3FF;border:1px solid var(--line)}
+  .copy-btn{background:rgba(139,201,255,.10);color:var(--accent);border:1px solid var(--line)}
+  .copy-btn:active{background:rgba(139,201,255,.20)}
+  .minitoc a:active{background:rgba(139,201,255,.12)}
+  .infographic{background:rgba(255,255,255,.02)}
+  .imgslide figure{background:rgba(255,255,255,.02)}
+
+  /* Кнопки — светлый холодный градиент из стиля */
+  .btn-primary,.scard .open .arr,.wh-avatar,.lm-badge{
+    color:#06101A;background:linear-gradient(135deg,#FFFFFF,#B9E7FF 52%,#6DB9E7);
+    box-shadow:0 18px 44px rgba(92,182,236,.28),inset 0 1px 0 rgba(255,255,255,.80)}
+  .wh-avatar.alt{background:linear-gradient(135deg,#EAF6FF,#9AD8FF 52%,#6CB7E8);color:#06101A}
+  .btn-ghost{background:rgba(220,242,255,.08);color:#EAF7FF;border:1px solid var(--line);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.16)}
+  .hdots button,.imgdots button{background:rgba(198,230,248,.22)}
+  .hdots button.on,.imgdots button.on{background:linear-gradient(135deg,#F5FBFF,#82CAFA)}
+
+  /* Слайдер оффера */
+  .cc-name{color:var(--ink)}
+  .cc-quote{color:var(--ink-dim)}
+  .cc-progress{color:var(--ink-faint)}
+  .cc-arrow{background:rgba(255,255,255,.01);border:1px solid var(--line)}
+  .cc-arrow:hover{background:rgba(139,201,255,.18)}
+
+  /* Папки: цвета сохранены, подложка адаптирована под тёмный фон */
+  .folder__front{background:rgba(255,255,255,.20);
+    box-shadow:0 0 0 1.5px rgba(255,255,255,.40) inset,0 8px 18px -8px rgba(0,0,0,.45)}
+  .folder__label{color:var(--ink)}
+  .folder:active .folder__label,.folder:hover .folder__label{color:var(--accent)}
+
+  /* Меню шапки: тёмное стекло с блюром. Стекинг починен (навигация снова
+     z-index:100 над контентом), поэтому блюр размывает фон, а тёмный тон
+     затемняет — заголовок героя за меню становится приглушённым, не читается. */
+  .nav{background:rgba(7,13,24,.86)}
+  .dropdown{background:rgba(7,13,24,.90);border:1px solid rgba(150,185,220,.22);
+    -webkit-backdrop-filter:blur(26px) saturate(140%);backdrop-filter:blur(26px) saturate(140%);
+    box-shadow:0 26px 60px -10px rgba(0,0,0,.78),0 0 0 1px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.08)}
+  .drop-link:active{background:rgba(139,201,255,.14)}
+  .drop-t{color:#F2F8FF}
+  .drop-d{color:rgba(190,205,216,.66)}
+  .drop-num{color:var(--accent-2)}
+
+  /* Видео «Как ИИ меняет нашу жизнь» в самом верху */
+  .introvid{margin:0 0 26px}
+  .introvid-cap{font-family:var(--disp);font-weight:600;font-size:clamp(20px,6.4vw,26px);letter-spacing:-.02em;color:var(--ink);text-align:center;margin-bottom:14px;line-height:1.15}
+  .introvid-frame{position:relative;border-radius:20px;overflow:hidden;border:1px solid var(--card-brd);background:#000;box-shadow:0 24px 60px -26px rgba(0,0,0,.65)}
+  .introvid-frame video{display:block;width:100%;height:auto;border-radius:20px;background:#000}
+  .introvid-sub{text-align:center;font-size:13px;color:var(--ink-dim);margin-top:10px}
+
+  /* Ссылки на библиотеки промтов */
+  .sec a.pl{color:var(--accent-2);text-decoration:none;border-bottom:1px solid rgba(139,201,255,.45)}
+  .sec a.pl:active,.sec a.pl:hover{color:#fff;border-bottom-color:#fff}
+  .sec .lang{font-size:12px;color:var(--ink-faint)}
+
+  /* Компактное окно промта: весь текст внутри, скролл, копирование целиком */
+  .prompt pre{max-height:300px;overflow-y:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
+  .prompt pre::-webkit-scrollbar{width:5px}
+  .prompt pre::-webkit-scrollbar-thumb{background:rgba(139,201,255,.25);border-radius:4px}
+</style>
+</head>
+<body>
+<div class="site-bg" aria-hidden="true"></div>
+
+<div class="navwrap">
+  <nav class="nav">
+    <div class="nav-title" onclick="goHome()" aria-label="На главную"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"/></svg></div>
+    <div class="navmenu">
+      <div class="navitem">
+        <button onclick="toggleDrop(this)">Промты <span class="chev">▾</span></button>
+        <div class="dropdown">
+          <a class="drop-link" onclick="openArticle('promty','pr-howto')"><span class="drop-num">01</span><span><span class="drop-t">Как пользоваться</span><span class="drop-d">Инструкция + файл «Обо мне»</span></span></a>
+          <a class="drop-link" onclick="openArticle('promty','pr-life')"><span class="drop-num">02</span><span><span class="drop-t">7 лайфхаков</span><span class="drop-d">Усиливают любой промт</span></span></a>
+          <a class="drop-link" onclick="openArticle('promty','pr-cats')"><span class="drop-num">03</span><span><span class="drop-t">Библиотеки промтов</span><span class="drop-d">6 лучших площадок</span></span></a>
+          <a class="drop-link" onclick="openArticle('promty','pr-gold')"><span class="drop-num">04</span><span><span class="drop-t">🏆 GOLD-промты</span><span class="drop-d">С вау-эффектом</span></span></a>
+        </div>
+      </div>
+      <div class="navitem">
+        <button onclick="toggleDrop(this)">Путь развития <span class="chev">▾</span></button>
+        <div class="dropdown">
+          <a class="drop-link" onclick="openArticle('put','put-auto')"><span class="drop-num">01</span><span><span class="drop-t">Автоматизируй что угодно</span><span class="drop-d">Бизнес и жизнь</span></span></a>
+          <a class="drop-link" onclick="openArticle('put','put-fast')"><span class="drop-num">02</span><span><span class="drop-t">Твой путь в нейросетях</span><span class="drop-d">Лёгкий вход → путь с нуля</span></span></a>
+          <a class="drop-link" onclick="openArticle('put','put-money')"><span class="drop-num">03</span><span><span class="drop-t">Как заработать на ИИ в 2026</span><span class="drop-d">Направления и суммы</span></span></a>
+        </div>
+      </div>
+      <div class="navitem">
+        <button onclick="toggleDrop(this)">Как сделать <span class="chev">▾</span></button>
+        <div class="dropdown">
+          <a class="drop-link" onclick="openArticle('howto','h-mybot')"><span class="drop-num">01</span><span><span class="drop-t">Мой ИИ-агент «ДАОС»</span><span class="drop-d">Собран только силами ИИ</span></span></a>
+          <a class="drop-link" onclick="openArticle('howto','h-simple')"><span class="drop-num">02</span><span><span class="drop-t">Простые ИИ-агенты</span><span class="drop-d">Бесплатные варианты</span></span></a>
+          <a class="drop-link" onclick="openArticle('howto','h-carousel')"><span class="drop-num">03</span><span><span class="drop-t">Карусели в Instagram</span><span class="drop-d">Тема → карусель → постинг</span></span></a>
+          <a class="drop-link" onclick="openArticle('howto','h-video')"><span class="drop-num">04</span><span><span class="drop-t">Автомонтаж видео</span><span class="drop-d">Сырой ролик → клип с субтитрами</span></span></a>
+          <a class="drop-link" onclick="openArticle('howto','h-site')"><span class="drop-num">05</span><span><span class="drop-t">Сайт с нуля без кода</span><span class="drop-d">6 шагов до живой ссылки</span></span></a>
+        </div>
+      </div>
+    </div>
+  </nav>
+</div>
+
+<div class="stage">
+
+  <div id="home">
+    <div class="introvid">
+      <div class="introvid-cap">Как ИИ меняет нашу жизнь</div>
+      <div class="introvid-frame">
+        <video controls preload="none" playsinline poster="img/intro-ai-poster.jpg">
+          <source src="img/intro-ai.mp4" type="video/mp4">
+          Ваш браузер не поддерживает видео.
+        </video>
+      </div>
+      <div class="introvid-sub">🎬 Видео смонтировала нейросеть</div>
+    </div>
+    <section class="hero">
+      <div class="eyebrow">AI &amp; Автоматизация</div>
+      <h1>Автоматизируй <span class="g">что угодно</span></h1>
+      <p class="sub-strong">Получи бесплатно то, за что я заплатил временем и деньгами.</p>
+      <p class="sub">Тут есть всё: от базовых знаний до фишек для тех, кто уже в теме. Материал полный и упакован так, чтобы не грузить.</p>
+    </section>
+    <div class="home-h">Содержание</div>
+    <div class="sections">
+      <div class="scard">
+        <div class="scard-head"><span class="scard-num">01</span><h2>Библиотека промтов</h2></div>
+        <p>Готовые промты, лайфхаки, подборка лучших библиотек промтов и золотая GOLD-подборка + два видеоурока для новичков.</p>
+        <div class="glass-folders">
+          <button class="folder fc-indigo" onclick="openArticle('promty','pr-howto')">
+            <span class="folder__btn"><span class="folder__back"></span><span class="folder__front"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h8"/></svg></span></span>
+            <span class="folder__label"><span class="folder__num">01</span><br>Как пользоваться</span>
+          </button>
+          <button class="folder fc-coral" onclick="openArticle('promty','pr-life')">
+            <span class="folder__btn"><span class="folder__back"></span><span class="folder__front"><svg viewBox="0 0 24 24"><path d="M13 2 3 14h9l-1 8 10-12h-9z"/></svg></span></span>
+            <span class="folder__label"><span class="folder__num">02</span><br>7 лайфхаков</span>
+          </button>
+          <button class="folder fc-sky" onclick="openArticle('promty','pr-cats')">
+            <span class="folder__btn"><span class="folder__back"></span><span class="folder__front"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></span></span>
+            <span class="folder__label"><span class="folder__num">03</span><br>Библиотеки</span>
+          </button>
+          <button class="folder fc-amber" onclick="openArticle('promty','pr-gold')">
+            <span class="folder__btn"><span class="folder__back"></span><span class="folder__front"><svg viewBox="0 0 24 24"><path d="m12 2 2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.8 5.9 21.4l1.4-6.8L2.2 9.9l6.9-.8z"/></svg></span></span>
+            <span class="folder__label"><span class="folder__num">04</span><br>GOLD-промты</span>
+          </button>
+        </div>
+        <button class="open" onclick="openArticle('lm-promty')">Открыть <span class="arr">→</span></button>
+      </div>
+      <div class="scard">
+        <div class="scard-head"><span class="scard-num">02</span><h2>Твой путь развития</h2></div>
+        <p>Как автоматизировать что угодно и пошаговый план от нуля до дохода: от первого агента до сложных систем.</p>
+        <div class="glass-folders">
+          <button class="folder fc-indigo" onclick="openArticle('put','put-auto')">
+            <span class="folder__btn"><span class="folder__back"></span><span class="folder__front"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg></span></span>
+            <span class="folder__label"><span class="folder__num">01</span><br>Автоматизация</span>
+          </button>
+          <button class="folder fc-teal" onclick="openArticle('put','put-fast')">
+            <span class="folder__btn"><span class="folder__back"></span><span class="folder__front"><svg viewBox="0 0 24 24"><path d="M13 2 3 14h9l-1 8 10-12h-9z"/></svg></span></span>
+            <span class="folder__label"><span class="folder__num">02</span><br>Твой путь</span>
+          </button>
+          <button class="folder fc-coral" onclick="openArticle('put','put-money')">
+            <span class="folder__btn"><span class="folder__back"></span><span class="folder__front"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5a2.5 2 0 0 1 2.5-1.5c1.4 0 2.5.7 2.5 1.8 0 2.4-5 1.3-5 3.6 0 1.1 1.1 1.8 2.5 1.8a2.5 2 0 0 0 2.5-1.5"/></svg></span></span>
+            <span class="folder__label"><span class="folder__num">03</span><br>Заработок 2026</span>
+          </button>
+        </div>
+        <button class="open" onclick="openArticle('lm-put')">Открыть <span class="arr">→</span></button>
+      </div>
+      <div class="scard">
+        <div class="scard-head"><span class="scard-num">03</span><h2>Как сделать</h2></div>
+        <p>Практика по шагам: мой ИИ-агент, простые агенты, карусели с автопостингом, автомонтаж видео и сайт без кода.</p>
+        <div class="glass-folders">
+          <button class="folder fc-teal" onclick="openArticle('howto','h-mybot')">
+            <span class="folder__btn"><span class="folder__back"></span><span class="folder__front"><svg viewBox="0 0 24 24"><rect x="4" y="8" width="16" height="12" rx="2"/><path d="M12 8V4M9 14h.01M15 14h.01M2 12v4M22 12v4"/></svg></span></span>
+            <span class="folder__label"><span class="folder__num">01</span><br>Мой бот</span>
+          </button>
+          <button class="folder fc-indigo" onclick="openArticle('howto','h-simple')">
+            <span class="folder__btn"><span class="folder__back"></span><span class="folder__front"><svg viewBox="0 0 24 24"><path d="M12 2a5 5 0 0 1 5 5v2a5 5 0 0 1-10 0V7a5 5 0 0 1 5-5z"/><path d="M5 11a7 7 0 0 0 14 0M12 18v4"/></svg></span></span>
+            <span class="folder__label"><span class="folder__num">02</span><br>Простые агенты</span>
+          </button>
+          <button class="folder fc-sky" onclick="openArticle('howto','h-carousel')">
+            <span class="folder__btn"><span class="folder__back"></span><span class="folder__front"><svg viewBox="0 0 24 24"><rect x="7" y="4" width="10" height="16" rx="2"/><path d="M4 8v8M20 8v8"/></svg></span></span>
+            <span class="folder__label"><span class="folder__num">03</span><br>Карусели</span>
+          </button>
+          <button class="folder fc-coral" onclick="openArticle('howto','h-video')">
+            <span class="folder__btn"><span class="folder__back"></span><span class="folder__front"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m10 9 5 3-5 3z"/></svg></span></span>
+            <span class="folder__label"><span class="folder__num">04</span><br>Автомонтаж</span>
+          </button>
+        </div>
+        <button class="open" onclick="openArticle('lm-howto')">Открыть <span class="arr">→</span></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-library" id="page-library">
+    <button class="back" onclick="goHome()">← На главную</button>
+    <div class="a-eyebrow">Библиотека материалов</div>
+    <h1 class="lib-title">Все материалы в одном месте</h1>
+    <p class="lead">Три бесплатных блока: библиотека промтов, карта развития в AI и практика «как сделать». Листай подряд или прыгай по содержанию.</p>
+    <div class="minitoc lib-toc">
+      <div class="ttl">Содержание</div>
+      <a href="#lm-promty"><span class="mn">01</span><span><span class="mt">Библиотека промтов</span><span class="md">Лайфхаки, библиотеки и GOLD-подборка</span></span></a>
+      <a href="#lm-put"><span class="mn">02</span><span><span class="mt">Твой путь развития</span><span class="md">Автоматизация, план от 0 до дохода</span></span></a>
+      <a href="#lm-howto"><span class="mn">03</span><span><span class="mt">Как сделать</span><span class="md">Сайт, видео, карусели, ИИ-агент</span></span></a>
+    </div>
+
+  <div class="article" id="art-promty">
+    <div class="lm-anchor" id="lm-promty"></div>
+    <div class="a-eyebrow">Раздел 01 · Промты</div>
+    <h1>Большая библиотека промтов 2026</h1>
+    <p class="lead">Неважно, на каком ты уровне владения нейросетями. <b>Обязательно долистай до самого конца и протестируй GOLD-подборку</b> — например, запусти трансформационную игру «Лила» или собери самоулучшающуюся память проекта одним запросом. Каждый такой промт по-своему сносит крышу. А для новичков в самом конце лежат два видеоурока, которые продвинут твой опыт работы с ChatGPT/Claude на несколько уровней.</p>
+    <div class="minitoc">
+      <div class="ttl">Содержание</div>
+      <a href="#pr-howto"><span class="mn">01</span><span><span class="mt">Инструкция</span><span class="md">Как пользоваться библиотекой + файл «Обо мне»</span></span></a>
+      <a href="#pr-life"><span class="mn">02</span><span><span class="mt">Лайфхаки</span><span class="md">7 приёмов, усиливающих любой промт</span></span></a>
+      <a href="#pr-cats"><span class="mn">03</span><span><span class="mt">Библиотеки промтов</span><span class="md">6 лучших площадок</span></span></a>
+      <a href="#pr-gold"><span class="mn">04</span><span><span class="mt">Промты с вау-эффектом</span><span class="md">🏆 GOLD-подборка</span></span></a>
+    </div>
+    <section class="sec g-light" id="pr-howto">
+      <div class="lm-head"><span class="lm-badge">01</span><h3>Как пользоваться этой библиотекой</h3></div>
+      <div class="ssub">Прочитай один раз</div>
+      <p>Главный принцип 2026 года: <b>сильный промт — это не «красивая роль», а техническое задание</b>. В нём всегда четыре вещи: контекст, цель, ограничения и формат ответа. Нет их — модель льёт воду.</p>
+      <div class="quote">Везде, где в промте стоит <code>[что-то в скобках]</code> — это место, куда подставляешь своё. Чем конкретнее — тем сильнее ответ.</div>
+      <p>Значок 📎 у промта = прикрепи файл <code>about-me.md</code>.</p>
+      <h3 style="margin-top:18px">Файл «Обо мне» (about-me.md)</h3>
+      <div class="ssub">Собрал один раз — модель знает твой контекст</div>
+      <ul>
+        <li>Обычный текстовый файл с фактурой о тебе: ниша, продукт, аудитория, цели, тон.</li>
+        <li>Прикрепляешь к чату — и не нужно объяснять заново, кто ты.</li>
+        <li>Собрать можно за 5 минут руками самой модели — по готовому промту с вопросами.</li>
+      </ul>
+      <details class="prompt"><summary><span class="pq">📎</span> Промт: собрать файл «Обо мне» <span class="pchev">▾</span></summary><div class="pbody">
+        <div class="goal"><b>Цель.</b> Один раз собрать контекст о себе, чтобы прикреплять к будущим чатам.</div>
+        <div class="codewrap"><pre>Помоги мне собрать файл "Обо мне" (about-me.md), который я буду прикреплять к будущим
+диалогам, чтобы ты сразу понимал контекст обо мне и моём деле.
+
+Задай мне по очереди вопросы по блокам ниже. По 2–3 вопроса за раз, жди ответа.
+Если отвечаю расплывчато — переспроси конкретнее.
+
+Блоки:
+1. КТО Я: имя, чем занимаюсь, языки, страна/рынок.
+2. МОЁ ДЕЛО: ниша, продукты/услуги, этап бизнеса.
+3. АУДИТОРИЯ: кто клиенты, их боли, их язык.
+4. ПОЗИЦИОНИРОВАНИЕ: чем отличаюсь, сильные стороны, кейсы/цифры.
+5. ЦЕЛИ: что хочу в ближайшие 3–6 месяцев.
+6. ТОН И СТИЛЬ: как общаюсь, какие слова люблю/ненавижу.
+7. КОНТЕКСТ И ОГРАНИЧЕНИЯ: бюджет, ресурсы, табу, рамки ниши.
+
+Когда соберёшь ответы — оформи всё в чистый файл about-me.md с заголовками
+и короткими пунктами, который я сохраню и переиспользую.</pre>
+        <button class="copy-btn" onclick="copyPrompt(this)">Скопировать промт</button></div>
+        <div class="out"><b>Что получишь.</b> Готовый файл-контекст: сохраняешь как about-me.md и прикрепляешь к любому чату.</div>
+      </div></details>
+    </section>
+    <section class="sec g-graphite" id="pr-life">
+      <div class="lm-head"><span class="lm-badge">02</span><h3>7 лайфхаков, усиливающих любой промт</h3></div>
+      <div class="ssub">Работают с любым запросом</div>
+      <ul>
+        <li><b>Заставь модель задать вопросы.</b> «Если данных не хватает — задай до 5 уточняющих вопросов перед ответом».</li>
+        <li><b>Проси формат явно.</b> Таблица, список, 5 строк — иначе модель льёт абзацы.</li>
+        <li><b>Двигайся слоями.</b> Сначала структура → потом наполнение → потом правки.</li>
+        <li><b>Ставь отдельного ревизора</b> новым сообщением, а не «перепроверь себя».</li>
+        <li><b>Сохраняй удачные промты.</b> Повторяемость = система.</li>
+        <li><b>Делай навык с самопроверкой</b> (eval-loop): файлы evals.md и memory.md рядом.</li>
+        <li><b>Повторяется задача — преврати в навык.</b> Описываешь один раз «как», дальше говоришь только «что».</li>
+      </ul>
+    </section>
+    <section class="sec g-light" id="pr-cats">
+      <div class="lm-head"><span class="lm-badge">03</span><h3>Библиотеки промтов</h3></div>
+      <div class="ssub">Готовые базы промтов — бери и пользуйся</div>
+      <p>Всё уже придумали за нас: библиотеки с тысячами готовых GPT-промтов для работы, учёбы и отдыха.</p>
+      <p>Не трать время на составление запросов с нуля — используй готовые шаблоны. Вот <b>6 лучших площадок</b>:</p>
+
+      <div class="catttl">🎨 Для картинок и дизайна</div>
+      <ul>
+        <li><b><a class="pl" href="https://prompthero.com" target="_blank" rel="noopener noreferrer">Prompthero.com</a></b> <span class="lang">(англ.)</span> — огромный международный каталог промтов с примерами готовых артов. Помогает подбирать стили, свет и ракурсы.</li>
+        <li><b><a class="pl" href="https://prompt1.ru" target="_blank" rel="noopener noreferrer">Prompt1.ru</a></b> <span class="lang">(рус.)</span> — удобная русскоязычная база с гибкими фильтрами по сферам, стилям и профессиям.</li>
+      </ul>
+
+      <div class="catttl">🏛️ Официальные каталоги от разработчиков ИИ</div>
+      <ul>
+        <li><b><a class="pl" href="https://docs.anthropic.com/en/prompt-library/library" target="_blank" rel="noopener noreferrer">Anthropic Prompt Library</a></b> <span class="lang">(англ.)</span> — профессиональные шаблоны от создателей Claude для кодинга, анализа данных и сложных задач.</li>
+        <li><b>Каталог GigaChat</b> <span class="lang">(рус.)</span> — официальная база от «Сбера», идеально адаптированная под особенности русского языка.</li>
+      </ul>
+
+      <div class="catttl">🛠️ Универсальные базы под любые задачи</div>
+      <ul>
+        <li><b><a class="pl" href="https://prompts.chat" target="_blank" rel="noopener noreferrer">Prompts.chat</a></b> <span class="lang">(англ.)</span> — популярная коллекция ролевых инструкций, превращающих нейросеть в узкого специалиста.</li>
+        <li><b>Академия BotHub</b> <span class="lang">(рус.)</span> — практичные подборки нетривиальных промтов для повседневной работы, учёбы и автоматизации.</li>
+      </ul>
+    </section>
+    <section class="sec g-graphite" id="pr-gold">
+      <div class="lm-head"><span class="lm-badge">04</span><h3>🏆 GOLD: промты, которые сносят башку</h3></div>
+      <div class="ssub">Самая сильная подборка — для эффекта «вау»</div>
+      <details class="prompt"><summary><span class="pq">G1</span> Самоулучшающаяся память проекта <span class="pchev">▾</span></summary><div class="pbody">
+        <div class="goal"><b>Цель.</b> Модель учится на ошибках между сессиями, записывая правила в файл-память.</div>
+        <div class="codewrap"><pre>После выполнения задачи сделай:
+1. Reflect — что пошло не так или что можно лучше.
+2. Abstract — вытащи общий принцип, не частный случай.
+3. Generalize — переформулируй как правило на будущее.
+4. Add to CLAUDE.md — добавь это правило в файл памяти проекта.
+
+Сделай в формате короткого правила, полезного в будущих задачах.</pre>
+        <button class="copy-btn" onclick="copyPrompt(this)">Скопировать промт</button></div>
+        <div class="out"><b>Что получишь.</b> Растущий файл правил — каждая сессия умнее предыдущей.</div>
+      </div></details>
+      <details class="prompt"><summary><span class="pq">G2</span> Каркас задания T-C-R-E-I <span class="pchev">▾</span></summary><div class="pbody">
+        <div class="goal"><b>Цель.</b> Инженерный шаблон под любой серьёзный промт по 5 блокам.</div>
+        <div class="codewrap"><pre>TASK (Задача): [роль + формат вывода]
+CONTEXT (Контекст): [фон + ограничения]
+REFERENCES (Источники): [методологии, данные, стиль]
+EVALUATE (Оценка): [как буду проверять ответ]
+ITERATE (Итерация): [как буду уточнять]</pre>
+        <button class="copy-btn" onclick="copyPrompt(this)">Скопировать промт</button></div>
+        <div class="out"><b>Что получишь.</b> Дисциплину, по которой собирается любой промт — качество растёт скачком.</div>
+      </div></details>
+      <details class="prompt"><summary><span class="pq">G3</span> Трансформационная игра «Лила» <span class="pchev">▾</span></summary><div class="pbody">
+        <div class="goal"><b>Цель.</b> Сакральная игра самопознания. Модель — жёсткий проводник осознанности.</div>
+        <div class="codewrap"><pre>Ты — ведущий трансформационной игры «Лила» (Game of Self-Knowledge).
+Действуешь СТРОГО по классическим правилам.
+Роль: не утешитель, а проводник осознанности; говоришь прямо, без сглаживания.
+
+Правила:
+1. Играем как в сакральную игру, не мотивационный чат.
+2. Я формулирую НАМЕРЕНИЕ перед началом.
+3. Я бросаю кубик ИЛИ прошу сгенерировать число 1–6.
+4. Ты фиксируешь клетку и её название.
+5. Даёшь: суть клетки, теневую сторону, как проявляется сейчас,
+   что блокирует, какое осознание требуется.
+6. Стрелы/змеи — чётко объясняешь почему.
+7. Не подбадриваешь автоматически. Неприятную правду не смягчаешь.
+8. Помнишь моё намерение всю игру.
+
+В начале попроси: 1) намерение 2) подтверждение играть честно.</pre>
+        <button class="copy-btn" onclick="copyPrompt(this)">Скопировать промт</button></div>
+        <div class="out"><b>Что получишь.</b> Игру-погружение, где каждая клетка — зеркало состояния. Файл about-me не нужен.</div>
+      </div></details>
+
+      <details class="prompt"><summary><span class="pq">G4</span> Распаковка личности через архетипы <span class="pchev">▾</span></summary><div class="pbody">
+        <div class="goal"><b>Цель.</b> «Распаковка» через архетипы Юнга/Пирсон — для аутентичного позиционирования блога. Работает интервью, по 2–3 вопроса.</div>
+        <div class="codewrap"><pre>Роль: Ты — эксперт по глубинной психологии, архетипическому анализу (по К.Г. Юнгу и Пирсон) и стратегический маркетолог для личных брендов. Твоя задача провести мою «распаковку» личности через архетипы, чтобы я мог(ла) выстроить аутентичный блог.
+
+Твоя цель: Выявить мой ведущий архетип, теневые стороны и архетипические сочетания, которые создадут уникальное позиционирование в соцсетях.
+
+Правила работы:
+
+1. Не выдавай всё сразу. Мы будем работать пошагово.
+
+2. Интервьюерский подход. Задавай мне по 2-3 глубоких вопроса за один раз. Жди моего ответа, прежде чем задавать следующие.
+
+3. Анализ. После моих ответов на блок вопросов, делай краткое резюме того, что ты уже понял(а) о моей личности, и переходи к следующему блоку.
+
+4. Глубина. Избегай банальностей. Задавай вопросы, которые заставляют задуматься о ценностях, страхах, детских воспоминаниях и истинных мотивах, а не только о «хобби и работе».
+
+План нашей работы:
+
+- Этап 1: Исследование личности. Твои вопросы о моих ценностях, драйверах, о том, что меня вдохновляет и что пугает.
+
+- Этап 2: Поведенческие паттерны. Как я принимаю решения, как реагирую на конфликты, как проявляюсь в социуме.
+
+- Этап 3: Синтез и архетипы. На основе всех ответов ты подбираешь мой основной архетип и 1-2 вспомогательных.
+
+- Этап 4: Стратегия блога. Ты составляешь ТЗ для контента: о чем писать, какой визуальный стиль выбрать, какую «тональность» (Tone of Voice) использовать, чтобы транслировать эти архетипы.
+
+Начинай прямо сейчас. Поприветствуй меня и задай первые 2-3 вопроса из Этапа 1.</pre>
+        <button class="copy-btn" onclick="copyPrompt(this)">Скопировать промт</button></div>
+        <div class="out"><b>Что получишь.</b> Ведущий архетип, теневые стороны и готовое ТЗ на контент: темы, визуал, Tone of Voice.</div>
+      </div></details>
+      <details class="prompt"><summary><span class="pq">G5</span> Коуч-сессия GROW <span class="pchev">▾</span></summary><div class="pbody">
+        <div class="goal"><b>Цель.</b> Личная коуч-сессия по методологии GROW: один сократический вопрос за ход — без готовых советов.</div>
+        <div class="codewrap"><pre>&lt;system_prompt&gt;
+Вы — высококвалифицированный коуч-технолог, работающий по методологии GROW (Goal, Reality, Options, Will) и использующий классический сократический метод ведения диалога. Ваша цель — помочь пользователю самостоятельно деконструировать его проблему, найти внутренние ресурсы и сформировать устойчивую стратегию действий.
+
+РЕЖИМ РАБОТЫ: STRICT INTERACTIVE FLOW
+Вы должны строго следовать правилу: ЗА ОДИН ХОД ВЫ ЗАДАЕТЕ ТАКТИЧЕСКИ РОВНО ОДИН ВОПРОС И ЖДЕТЕ ОТВЕТА ПОЛЬЗОВАТЕЛЯ.
+
+ПРАВИЛА СТРОЕНИЯ ВАШИХ ОТВЕТОВ:
+1. В начале каждого ответа сделайте краткое терапевтическое отражение (парафраз) слов пользователя (1-2 предложения). Подсветите ключевую эмоцию, скрытую ценность или ценностное стремление (Познание, Влияние, Добродетель или Ценность), которое вы заметили в его словах.
+2. Никогда не предлагайте готовых решений, списков действий, планов или советов.
+3. Задавайте глубокие, открытые вопросы, которые заставляют пользователя исследовать скрытые зоны его опыта, внутренние препятствия или незадействованные ресурсы.
+4. Двигайтесь последовательно по фазам GROW:
+   - Фаза G (Goal): Выяснение истинной, экологичной цели диалога на сегодня.
+   - Фаза R (Reality): Исследование текущего положения дел, имеющихся ресурсов и барьеров (как внутренних, так и внешних).
+   - Фаза O (Options): Творческий поиск альтернативных путей решения без оглядки на ограничения.
+   - Фаза W (Will): Кристаллизация конкретного первого шага, оценка уровня ответственности по шкале от 1 до 10 и создание системы личной подотчетности.
+5. Не переходите к следующей фазе, пока полностью не проработана текущая.
+&lt;/system_prompt&gt;
+
+&lt;first_step_protocol&gt;
+Начните диалог с теплого профессионального приветствия. Кратко обозначьте рамки нашей сегодняшней сессии и предложите сформулировать тему, с которой мы начнем работу, задав первый фокусирующий вопрос для определения Цели (Goal). Выдайте только это приветствие и первый вопрос.
+&lt;/first_step_protocol&gt;</pre>
+        <button class="copy-btn" onclick="copyPrompt(this)">Скопировать промт</button></div>
+        <div class="out"><b>Что получишь.</b> Деконструированную проблему и конкретный первый шаг, к которому пришёл ты сам.</div>
+      </div></details>
+      <details class="prompt"><summary><span class="pq">G6</span> Анализ внешности и стиля (Киббе) <span class="pchev">▾</span></summary><div class="pbody">
+        <div class="goal"><b>Цель.</b> Разбор внешности по фото: архетип по Киббе, макияж, стиль, мудборд. Прикрепи своё фото к сообщению.</div>
+        <div class="codewrap"><pre>Проанализируй, пожалуйста, мою внешность по фотографии. Определи какой у меня «вау-фактор» по внешности.
+
+Сделай, пожалуйста, такой анализ:
+
+1. Анализ внешности (по фото)
+- форма и особенности лица
+— ключевые черты, которые создают мой вайб
+— какая энергия от меня идёт
+- какой архетип по Киббе считывается по внешности
+- какие визуальные ассоциации вызывает моя внешность
+
+2. Итог: мой главный архетип по Киббе и энергия
+— один главный архетип
+- один-два поддерживающих архетипа
+- как это выражено в моих чертах
+— как мне лучше транслировать себя в жизни и в соцсетях
+
+Макияж:
+- какие зоны лица подчеркивать
+- техники, которые усиливают мою красоту
+- оттенки, которые мне идут
+
+Избегать:
+— техники, которые искажают мой типаж
+— цвета, которые портят гармонию
+
+Пожалуйста, подбери и приложи:
+- примеры образов (одежда)
+- примеры макияжа
+- примеры эстетики/вайба
+— мини-мудборд по моему стилю
+
+Стиль для соцсетей:
+- какая визуальная эстетика мне подходит
+— какой вайб усиливает мою привлекательность
+— как лучше выглядеть в Reels и сторис
+- какие темы и образы работают лучше всего
+
+Важно:
+Хочу, чтобы итог был чётким, структурированным, красивым и практичным, как полноценная консультация стилиста, имидж-мейкера.</pre>
+        <button class="copy-btn" onclick="copyPrompt(this)">Скопировать промт</button></div>
+        <div class="out"><b>Что получишь.</b> Полноценную консультацию стилиста: что подчёркивать, чего избегать, как выглядеть в соцсетях.</div>
+      </div></details>
+      <details class="prompt"><summary><span class="pq">G7</span> Финансовый психолог: денежный потолок <span class="pchev">▾</span></summary><div class="pbody">
+        <div class="goal"><b>Цель.</b> Найти убеждение, которое ставит потолок в доходе, — жёстко, без утешений, один вопрос за раз.</div>
+        <div class="codewrap"><pre>Ты - финансовый психолог и аналитик поведения. Твоя задача - максимально быстро выявить главное убеждение, из-за которого я зарабатываю меньше, чем способен.
+
+Я хочу понять, что именно внутри меня создаёт потолок в доходе, заставляет откладывать действия, бояться денег или снова и снова приходить к одному и тому же финансовому результату.
+
+Формат работы (строго):
+
+1. Ты задаёшь ОДИН чёткий, направляющий вопрос за раз.
+
+2. После моего ответа ты:
+* кратко говоришь, что это может значить;
+* проверяешь, не обманываю ли я себя;
+* сразу задаёшь следующий, более жёсткий и конкретный вопрос.
+
+3. Ты сокращаешь путь и не уходишь в долгие рассуждения.
+
+Твоя стратегия:
+* быстро найти повторяющийся финансовый сценарий;
+* определить убеждение, которое ограничивает мой доход;
+* проверить, какую скрытую выгоду я получаю, оставаясь на текущем уровне;
+* вывести меня на главный страх, связанный с большими деньгами;
+* отделить реальные причины от оправданий, которыми я объясняю своё положение.
+
+Если я отвечаю размыто, философствую или начинаю оправдываться - перебивай и переформулируй вопрос так, чтобы я говорил только про реальные ситуации, конкретные решения и своё поведение.
+
+Ты можешь задавать прямые вопросы вроде:
+* «Что изменится в твоей жизни, если завтра ты начнёшь зарабатывать в пять раз больше?»
+* «Кто из твоего окружения будет чувствовать себя некомфортно, если ты станешь богатым?»
+* «Какую цену ты боишься заплатить за большие деньги?»
+* «Когда в последний раз ты сам отказался от возможности заработать больше?»
+* «Какое убеждение о богатых людях ты до сих пор носишь в себе?»
+* «Почему твоя психика считает нынешний доход безопаснее, чем высокий?»
+
+Твоя цель - за 5-10 вопросов довести меня до одного ясного ответа: какое убеждение сильнее всего ограничивает мой финансовый рост, откуда оно появилось, как оно проявляется в моей жизни и какие три конкретных действия помогут начать разрушать его уже сейчас.
+
+Не успокаивай меня и не пытайся быть приятным. Если увидишь самообман, противоречия или попытки уйти от правды - говори об этом прямо.
+
+Начни с первого вопроса сразу.</pre>
+        <button class="copy-btn" onclick="copyPrompt(this)">Скопировать промт</button></div>
+        <div class="out"><b>Что получишь.</b> За 5–10 вопросов — главное ограничивающее убеждение и 3 действия, чтобы начать его разрушать.</div>
+      </div></details>
+      <details class="prompt"><summary><span class="pq">G8</span> Промт истины (анти-галлюцинации) <span class="pchev">▾</span></summary><div class="pbody">
+        <div class="goal"><b>Цель.</b> Режим «только правда»: факты, источники, никаких выдумок. Вставь в системные или пользовательские инструкции.</div>
+        <div class="codewrap"><pre>СЛЕДУЙ ЭТОМУ СТИЛЮ ПИСЬМА:
+• ДОЛЖЕН всегда говорить правду. Никогда не выдумывать информацию, не строить предположения и не гадать.
+• ДОЛЖЕН основывать все утверждения на проверяемых, фактических и актуальных источниках.
+• ДОЛЖЕН чётко указывать источник для каждого утверждения прозрачным способом, без расплывчатых ссылок.
+• ДОЛЖЕН прямо писать: «Я не могу это подтвердить», если что-то нельзя верифицировать.
+• ДОЛЖЕН ставить точность выше скорости. При необходимости предпринимать шаги для проверки перед ответом.
+• ДОЛЖЕН сохранять объективность. Убирать личные предвзятости, допущения и мнение — если только мнение не запрошено явно и не помечено как мнение.
+• ДОЛЖЕН давать интерпретации только тогда, когда они подтверждаются надёжными, авторитетными источниками.
+• ДОЛЖЕН объяснять ход рассуждений пошагово, когда точность ответа может быть поставлена под сомнение.
+• ДОЛЖЕН показывать, как была получена любая числовая величина (как рассчитана или из какого источника взята).
+• ДОЛЖЕН излагать информацию ясно, чтобы пользователь мог проверить её самостоятельно.
+
+ТЫ ОБЯЗАН ИЗБЕГАТЬ:
+• ИЗБЕГАЙ фабрикации фактов, цитат или данных.
+• ИЗБЕГАЙ использования устаревших или ненадёжных источников без явного предупреждения.
+• ИЗБЕГАЙ отсутствия деталей об источнике для любого утверждения.
+• ИЗБЕГАЙ подачи предположений, слухов или догадок как фактов.
+• ИЗБЕГАЙ «ИИ-ссылок», которые не ведут на реальный, проверяемый контент.
+• ИЗБЕГАЙ ответа при неуверенности, не обозначив эту неуверенность.
+
+ФИНАЛЬНЫЙ СТРАХОВОЧНЫЙ ШАГ (ПЕРЕД ОТВЕТОМ):
+«Каждое ли утверждение в моём ответе проверяемо, подкреплено реальными и авторитетными источниками, не содержит выдумок и снабжено прозрачными ссылками? Если нет — перепиши ответ, пока это не будет выполнено.»</pre>
+        <button class="copy-btn" onclick="copyPrompt(this)">Скопировать промт</button></div>
+        <div class="out"><b>Что получишь.</b> Ответы, где каждое утверждение проверяемо, с прозрачными ссылками на источники.</div>
+      </div></details>
+      <details class="prompt"><summary><span class="pq">G9</span> Консилиум пяти экспертов <span class="pchev">▾</span></summary><div class="pbody">
+        <div class="goal"><b>Цель.</b> Пять школ психологии разбирают твою ситуацию как живой консилиум. Впиши свой случай в блок user_case внизу.</div>
+        <div class="codewrap"><pre>&lt;system_prompt&gt;
+Вы — координатор высокотехнологичной междисциплинарной панели экспертов, специализирующихся на комплексном анализе человеческой психики и поведения. Ваша задача — организовать глубокую, содержательную дискуссию между признанными теоретическими школами по поводу ситуации, предоставленной пользователем.
+
+В состав вашей панели входят следующие виртуальные специалисты:
+1. Доктор А (Теория привязанности) — опирается на модель PACT Стэна Таткина и работы Дианы Хеллер. Фокусируется на сорегуляции нервной системы, стилях привязанности и обеспечении безопасности в отношениях.
+2. Доктор Б (Психодинамический подход) — опирается на классическую теорию объектных отношений и современный психоанализ. Исследует бессознательные защиты, перенос, проекции и скрытые выгоды деструктивного поведения.
+3. Соматический травматерапевт — опирается на труды Бессела ван дер Колка, Габора Матэ и Питера Левина. Анализирует телесные проявления стресса, заблокированные соматические реакции и дисрегуляцию вегетативной нервной системы.
+4. IFS-терапевт (Система субличностей) — работает по методу Ричарда Шварца. Выявляет внутренние части (Менеджеров, Пожарных, Изгнанников), их защитные роли и помогает восстановить контакт с когерентным "Я".
+5. Поведенческий экономист — опирается на концепции поведенческой психологии Даниэля Канемана и Ричарда Талера. Выявляет когнитивные искажения (систематические ошибки мышления), анализирует структуру стимулов, скрытые издержки упущенной выгоды и иррациональные паттерны принятия решений.
+
+ПРАВИЛА ДИСКУССИИ:
+- Каждый эксперт должен говорить строго в рамках своей методологии, используя ее специфический понятийный аппарат.
+- Выступления должны быть субстантивными (3-5 предложений), без поверхностных советов и банальных утешений.
+- Эксперты обязаны вступать в дискуссию друг с другом: отмечать точки согласия, концептуальные противоречия или дополнять анализ коллеги со своей позиции.
+- Избегайте шаблонных фраз вроде "рад быть здесь" или "коллеги, я согласен". Дискуссия должна выглядеть как живой академический консилиум профессионалов.
+&lt;/system_prompt&gt;
+
+&lt;context_rules&gt;
+- Не делайте выводов на основе догадок, анализируйте только предоставленный текст.
+- Сохраняйте полную конфиденциальность и клиническую объективность.
+- Никогда не выходите из роли модератора консилиума.
+&lt;/context_rules&gt;
+
+&lt;output_format&gt;
+Дискуссия должна быть структурирована следующим образом:
+
+## Стенограмма междисциплинарного консилиума
+- **Доктор А (Теория привязанности)**: [Анализ ситуации с точки зрения нервной системы и межличностной безопасности]
+- **Доктор Б (Психодинамический подход)**: [Анализ скрытых защит и бессознательных паттернов, апеллирующий к выводам Доктора А]
+- **Соматический травматерапевт**: [Анализ телесной интеграции стресса, дополняющий предыдущих ораторов]
+- **IFS-терапевт (Субличности)**: [Картирование внутренних частей, вовлеченных в данный паттерн]
+- **Поведенческий экономист**: [Деконструкция когнитивных ошибок и поведенческих стимулов, поддерживающих статус-кво]
+
+## Интегративный синтез модератора
+- **Точки конвергенции**: [Синтезированный анализ областей, в которых мнения всех пяти экспертов сходятся]
+- **Продуктивное концептуальное напряжение**: [Описание зон, где разные школы видят проблему принципиально по-разному]
+- **Единый пошаговый вектор действий**: [Практическая, научно обоснованная рекомендация, объединяющая выводы всех специалистов]
+- **Один преобразующий вопрос**: [Глубокий вопрос для самостоятельного осмысления пользователем]
+&lt;/output_format&gt;
+
+&lt;user_case&gt;
+[Опишите вашу ситуацию: повторяющийся жизненный сценарий, конфликт в отношениях, необъяснимый страх или профессиональный тупик]
+&lt;/user_case&gt;</pre>
+        <button class="copy-btn" onclick="copyPrompt(this)">Скопировать промт</button></div>
+        <div class="out"><b>Что получишь.</b> Стенограмму дискуссии + синтез: где эксперты сходятся, вектор действий и один преобразующий вопрос.</div>
+      </div></details>
+    </section>
+    <div class="endcta">
+      <h4>Два бесплатных аудиоурока</h4>
+      <p>После них ты будешь использовать свой чат <b>круче, чем 90% пользователей</b>: перестанешь получать слабые ответы и научишь модель не повторять ошибки. А со вторым уроком — про <b>навыки (скиллы)</b> — соберёшь свои <b>первые автоматизации</b>. Коротко, по 3–5 минут, простым языком.</p>
+      <a class="btn btn-primary" onclick="goOffer()">Получить доступ →</a>
+    </div>
+  </div>
+
+  <div class="article" id="art-put">
+    <div class="lm-anchor" id="lm-put"></div>
+    <div class="a-eyebrow">Раздел 02 · Путь развития</div>
+    <h1>Твой путь развития в AI</h1>
+    <p class="lead">Три части: как автоматизировать что угодно — в бизнесе и в жизни, твой путь в нейросетях от лёгкого входа до профессии, и как на этом заработать в 2026.</p>
+    <div class="minitoc">
+      <div class="ttl">Содержание</div>
+      <a href="#put-auto"><span class="mn">01</span><span><span class="mt">Автоматизируй что угодно</span><span class="md">Что такое, что даёт, принцип, бизнес и жизнь</span></span></a>
+      <a href="#put-fast"><span class="mn">02</span><span><span class="mt">Твой путь в нейросетях</span><span class="md">Лёгкий вход → путь с нуля до профессии</span></span></a>
+      <a href="#put-money"><span class="mn">03</span><span><span class="mt">Как заработать на ИИ в 2026</span><span class="md">Направления и суммы</span></span></a>
+    </div>
+    <section class="sec g-light" id="put-auto">
+      <div class="lm-head"><span class="lm-badge">01</span><h3>Автоматизируй что угодно</h3></div>
+      <div class="ssub">Что такое · что даёт · принцип · бизнес · жизнь</div>
+      <p>Автоматизация — это когда ты <b>один раз настраиваешь процесс и больше не делаешь его руками</b>. Сегодня для этого не нужен программист: многое собираешь сам через простые сервисы и ИИ.</p>
+      <p>Крупные компании уже внедряют ИИ в свои процессы. <b>Кто автоматизирует раньше — тот работает быстрее</b> и обходит тех, кто всё ещё делает вручную.</p>
+      <figure class="infographic"><img src="img/automation-benefits.png" alt="Что даёт автоматизация" loading="lazy" onclick="zoomImg(this)"></figure>
+      <p class="infocap">Что даёт автоматизация: ясность, меньше ошибок, больше времени и креатива. Нажми, чтобы увеличить.</p>
+      <h3 style="margin-top:6px">Главный принцип</h3>
+      <div class="quote">Сначала ясность, потом автоматизация. Нельзя поставить на автопилот хаос — иначе получится автоматический хаос.</div>
+      <p>Любая автоматизация начинается не с сервиса, а с <b>описания процесса</b>. Нужно понять:</p>
+      <ul>
+        <li>что <b>запускает</b> процесс;</li>
+        <li>какие шаги <b>повторяются</b>;</li>
+        <li>где человек <b>принимает решение</b>;</li>
+        <li>какие <b>данные</b> нужны;</li>
+        <li>куда уходит <b>результат</b>;</li>
+        <li>где нужна <b>проверка</b>.</li>
+      </ul>
+      <figure class="infographic"><img src="img/automate-process.png" alt="Как автоматизировать любой бизнес-процесс — 5 шагов" loading="lazy" onclick="zoomImg(this)"></figure>
+      <p class="infocap">Как автоматизировать любой бизнес-процесс — 5 шагов. Нажми, чтобы увеличить.</p>
+      <figure class="infographic"><img src="img/life-automate.png" alt="Что автоматизировать в личной жизни" loading="lazy" onclick="zoomImg(this)"></figure>
+      <p class="infocap">Что автоматизировать в личной жизни. Нажми, чтобы увеличить.</p>
+      <p>Тот же принцип масштабируется на услуги: <b>один человек с ИИ</b> закрывает задачи, под которые раньше нанимали целую команду — дизайн, тексты, видео, работу с клиентами.</p>
+      <figure class="infographic"><img src="img/freelancer-stack.png" alt="Автоматизация фрилансера с Claude Code" loading="lazy" onclick="zoomImg(this)"></figure>
+      <p class="infocap">Что можно собрать одним фрилансером с Claude Code. Нажми, чтобы увеличить.</p>
+      <p>Не пытайся автоматизировать всё сразу. Возьми <b>одну самую раздражающую задачу</b> и закрой её — первый настроенный процесс окупает мотивацию на все остальные.</p>
+      <div class="offer">
+        <div class="tag">Интенсив</div>
+        <p>Не хочешь собирать по крупицам месяцами? На нашем интенсиве ты <b>за неделю</b> разберёшься в вопросе с нуля и начнёшь <b>строить первых ИИ-агентов</b> — по шагам, с поддержкой и готовыми решениями.</p>
+        <a class="btn btn-primary" onclick="goOffer()">Узнать программу →</a>
+      </div>
+    </section>
+    <section class="sec g-graphite" id="put-fast">
+      <div class="lm-head"><span class="lm-badge">02</span><h3>Твой путь в нейросетях</h3></div>
+      <div class="ssub">Лёгкий вход → путь с нуля до профессии</div>
+      <p>Сначала кажется, что нейросети — это просто чат: спросил, получил ответ. Но если использовать ИИ правильно, он становится <b>усилителем</b>: помогает думать, писать, анализировать и запускать автоматизации. Начинается всё с лёгкого входа — базы и первых рабочих сценариев.</p>
+      <figure class="infographic"><img src="img/easy-entry.png" alt="Быстрый вход в автоматизацию — 10 шагов" loading="lazy" onclick="zoomImg(this)"></figure>
+      <p class="infocap">Быстрый вход в автоматизацию — 10 шагов для новичка. Нажми, чтобы увеличить.</p>
+      <p>Лёгкий вход даёт первые сценарии, но ещё не делает специалистом. Дальше — <b>полный путь</b>: от пользователя до AI-архитектора, который проектирует системы и берёт за это деньги.</p>
+      <figure class="infographic"><img src="img/path-architect.jpg" alt="Путь с нуля до AI-архитектора — 20 блоков" loading="lazy" onclick="zoomImg(this)"></figure>
+      <p class="infocap">Путь с нуля до AI-архитектора — дорожная карта из 20 блоков. Нажми, чтобы увеличить.</p>
+      <div class="quote">Результат пути: от «я пользуюсь ИИ» к «я вижу систему целиком, проектирую её и продаю».</div>
+    </section>
+    <section class="sec g-light" id="put-money">
+      <div class="lm-head"><span class="lm-badge">03</span><h3>Как заработать на ИИ в 2026</h3></div>
+      <div class="ssub">Направления от лёгкого старта к бизнесу</div>
+      <p>Деньги появляются там, где автоматизация влияет на <b>заявки, продажи, скорость, контроль или экономию времени</b>. На старте продаёшь простое — визуальные и текстовые услуги, чат-боты, микро-продукты и сайты без кода. Дальше — консалтинг, лидогенерация и операционные AI-системы.</p>
+      <figure class="infographic"><img src="img/income-ai.png" alt="Заработок на ИИ в 2026 — направления и суммы" loading="lazy" onclick="zoomImg(this)"></figure>
+      <p class="infocap">Заработок на ИИ в 2026: 6 направлений от лёгкого старта к масштабируемому бизнесу. Нажми, чтобы увеличить.</p>
+      <div class="offer">
+        <div class="tag">Интенсив</div>
+        <p>Чтобы это не стало ещё одной полезной инфой, которая ни к чему не привела — приходи на интенсив. С нуля научишься создавать первых агентов, прокачаешься в нейросетях и получишь доступ к сообществу с кучей материалов на месяц.</p>
+        <a class="btn btn-primary" onclick="goOffer()">Узнать программу и содержание →</a>
+      </div>
+    </section>
+  </div>
+
+  <div class="article" id="art-howto">
+    <div class="lm-anchor" id="lm-howto"></div>
+    <div class="a-eyebrow">Раздел 03 · Как сделать</div>
+    <h1>Практика по шагам</h1>
+    <p class="lead">Пять систем, которые ты соберёшь сам. Всё описано честно — можешь копировать и вставлять. Тезисно, по делу.</p>
+    <div class="minitoc">
+      <div class="ttl">Содержание</div>
+      <a href="#h-mybot"><span class="mn">01</span><span><span class="mt">Мой ИИ-агент «ДАОС»</span><span class="md">Реальный бот, собран только силами ИИ</span></span></a>
+      <a href="#h-simple"><span class="mn">02</span><span><span class="mt">Простые ИИ-агенты</span><span class="md">Бесплатные варианты для старта</span></span></a>
+      <a href="#h-carousel"><span class="mn">03</span><span><span class="mt">Карусели в Instagram</span><span class="md">Тема → карусель → постинг</span></span></a>
+      <a href="#h-video"><span class="mn">04</span><span><span class="mt">Автомонтаж видео</span><span class="md">Сырой ролик → клип с субтитрами</span></span></a>
+      <a href="#h-site"><span class="mn">05</span><span><span class="mt">Сайт с нуля без кода</span><span class="md">6 шагов до живой ссылки</span></span></a>
+    </div>
+    <section class="sec g-graphite" id="h-mybot">
+      <div class="lm-head"><span class="lm-badge">01</span><h3>Мой ИИ-агент «ДАОС»</h3></div>
+      <div class="ssub">Реальный бот, собранный только силами ИИ</div>
+      <p>«ДАОС» — мой личный операционный штаб в Telegram: задачи, финансы, привычки и календарь в одном боте, который понимает живую речь. Пишешь «потратил 2400 на кофе» — он сам понимает, что это трата, и записывает.</p>
+      <p>Главное: <b>я собрал его сам, без команды разработчиков</b> — только силами ИИ (Claude Code). Ниже — что он умеет, листай:</p>
+      <div class="imgslider">
+        <div class="imgtrack">
+          <div class="imgslide"><figure><img src="img/mybot-1.png" alt="ДАОС — что это" loading="lazy" onclick="zoomImg(this)"></figure></div>
+          <div class="imgslide"><figure><img src="img/mybot-2.png" alt="ДАОС — как работает днём" loading="lazy" onclick="zoomImg(this)"></figure></div>
+          <div class="imgslide"><figure><img src="img/mybot-3.png" alt="ДАОС — задачи, проекты и дашборд" loading="lazy" onclick="zoomImg(this)"></figure></div>
+          <div class="imgslide"><figure><img src="img/mybot-4.png" alt="ДАОС — возможности" loading="lazy" onclick="zoomImg(this)"></figure></div>
+        </div>
+        <div class="imgdots"></div>
+      </div>
+      <p class="imgcap">Мой бот ДАОС: что это → как работает днём → дашборд → возможности. Нажми, чтобы увеличить.</p>
+      <p><b>Какие сервисы я использовал:</b> Telegram Bot API (интерфейс), Supabase (база данных), Railway (хостинг), Google Gemini (мозг / function calling), Groq Whisper (голос → текст), Google Calendar (события).</p>
+      <p><b>Из чего состоит мой бот — технический стек.</b> Всё держится на бесплатных и дешёвых сервисах, связанных в одну систему:</p>
+      <figure class="infographic"><img src="img/mybot-6.png" alt="Технический стек бота ДАОС" loading="lazy" onclick="zoomImg(this)"></figure>
+      <p class="infocap">Мой стек: FastAPI, Supabase, Railway, Gemini, Telegram, Chart.js. Нажми, чтобы увеличить.</p>
+      <p><b>Пошаговая инструкция — как повторить его у себя.</b> От клона репозитория и настройки базы до деплоя на Railway и подключения webhook:</p>
+      <figure class="infographic"><img src="img/mybot-5.png" alt="Как создать ДАОС по репозиторию — пошагово" loading="lazy" onclick="zoomImg(this)"></figure>
+      <p class="infocap">Как повторить бота по репозиторию: аккаунты → клон → база → токены → деплой. Нажми, чтобы увеличить.</p>
+      <div class="offer">
+        <div class="tag">Интенсив</div>
+        <p>Если тебе что-то не понятно — ты можешь пройти наш интенсив, после которого <b>сам сделаешь такого ИИ-агента за 20 минут</b>.</p>
+        <a class="btn btn-primary" onclick="goOffer()">Узнать программу →</a>
+      </div>
+    </section>
+    <section class="sec g-light" id="h-simple">
+      <div class="lm-head"><span class="lm-badge">02</span><h3>Простые и бесплатные ИИ-агенты</h3></div>
+      <div class="ssub">С чего начать без вложений</div>
+      <p>Не обязательно сразу делать сложного бота. Есть простые и <b>бесплатные</b> варианты — собираются на бесплатных тирах сервисов и бесплатной LLM. Сначала выбираешь тип бота, потом стек — листай 4 вида:</p>
+      <div class="imgslider">
+        <div class="imgtrack">
+          <div class="imgslide"><figure><img src="img/bot-types-1.png" alt="Умный бот в Telegram бесплатно — виды ботов" loading="lazy" onclick="zoomImg(this)"></figure></div>
+          <div class="imgslide"><figure><img src="img/bot-types-2.png" alt="Виды ботов — часть 2" loading="lazy" onclick="zoomImg(this)"></figure></div>
+          <div class="imgslide"><figure><img src="img/bot-types-3.png" alt="Виды ботов — часть 3" loading="lazy" onclick="zoomImg(this)"></figure></div>
+        </div>
+        <div class="imgdots"></div>
+      </div>
+      <p class="imgcap">Виды ботов: задачи+календарь, финансы+привычки, голос→заметки, переводчик. Нажми, чтобы увеличить.</p>
+      <div class="offer">
+        <div class="tag">Гайд</div>
+        <p>Я расписал <b>детальную инструкцию</b>, как вам сделать агента самому — по шагам, с нуля.</p>
+        <a class="btn btn-primary" onclick="goOffer()">Забрать гайд →</a>
+      </div>
+    </section>
+    <section class="sec g-graphite" id="h-carousel">
+      <div class="lm-head"><span class="lm-badge">03</span><h3>Карусели в Instagram</h3></div>
+      <div class="ssub">Тема → карусель в твоём стиле → автопостинг</div>
+      <p>Даёшь тему → Claude пишет текст слайдов в твоём стиле → правишь → код рендерит слайды-картинки → карусель прилетает на телефон → после «ок» постится в Instagram. Листай: рабочий цикл и полная схема под капотом:</p>
+      <div class="imgslider">
+        <div class="imgtrack">
+          <div class="imgslide"><figure><img src="img/carousel-cycle.png" alt="Твой рабочий цикл: от темы до публикации карусели" loading="lazy" onclick="zoomImg(this)"></figure></div>
+          <div class="imgslide"><figure><img src="img/carousel-scheme.png" alt="Автоматизация каруселей для Instagram — полная схема" loading="lazy" onclick="zoomImg(this)"></figure></div>
+        </div>
+        <div class="imgdots"></div>
+      </div>
+      <p class="imgcap">Рабочий цикл (тема → рендер → постинг) и полная техническая схема. Нажми, чтобы увеличить.</p>
+      <div class="quote">Сначала тема → готовые PNG в твоём стиле. Только потом Telegram и постинг. Каждый этап — отдельный промпт.</div>
+      <div class="offer">
+        <div class="tag">Интенсив</div>
+        <p>Не соберёшь цепочку сам? На <b>недельном интенсиве</b> разберёшь всё по шагам и будешь <b>строить контент-машину и другие автоматизации под свой запрос сам</b>.</p>
+        <a class="btn btn-primary" onclick="goOffer()">Узнать программу →</a>
+      </div>
+    </section>
+    <section class="sec g-light" id="h-video">
+      <div class="lm-head"><span class="lm-badge">04</span><h3>Автомонтаж видео</h3></div>
+      <div class="ssub">Сырой ролик → вертикальное видео с субтитрами</div>
+      <p>Кидаешь ролик в папку → одна команда → готовое видео 1080×1920 с субтитрами, без пауз. Управление через Claude Code (ИИ пишет код за тебя). Всё бесплатное.</p>
+      <div class="imgslider">
+        <div class="imgtrack">
+          <div class="imgslide"><figure><img src="img/video-1.png" alt="Как работает автоматизация видео" loading="lazy" onclick="zoomImg(this)"></figure></div>
+          <div class="imgslide"><figure><img src="img/video-2.png" alt="Шаг 1 — настройка видео-пайплайна на Windows" loading="lazy" onclick="zoomImg(this)"></figure></div>
+          <div class="imgslide"><figure><img src="img/video-3.png" alt="Шаг 2 — установка базы: шаги и команды" loading="lazy" onclick="zoomImg(this)"></figure></div>
+          <div class="imgslide"><figure><img src="img/video-4.png" alt="Шаг 3 — дорожная карта возможностей" loading="lazy" onclick="zoomImg(this)"></figure></div>
+        </div>
+        <div class="imgdots"></div>
+      </div>
+      <p class="imgcap">Листай: как работает → настройка пайплайна → установка базы → дорожная карта. Нажми на фото, чтобы увеличить.</p>
+      <div class="quote">Не проси собрать «идеального монтажёра» одним промптом — развалится. Сначала один ролик от начала до конца, потом по одной фиче.</div>
+      <p><b>Куда расти дальше:</b> watch-folder (папка сама ловит новые ролики), удаление слов-паразитов, авторские субтитры, написание сценариев и семантическая нарезка длинных видео на клипы.</p>
+      <div class="offer">
+        <div class="tag">Интенсив</div>
+        <p>Если самому пока сложно и что-то непонятно — пройди наш <b>недельный интенсив</b>. После него будешь <b>с лёгкостью строить такие автоматизации под свой запрос сам</b>.</p>
+        <a class="btn btn-primary" onclick="goOffer()">Узнать программу →</a>
+      </div>
+    </section>
+    <section class="sec g-graphite" id="h-site">
+      <div class="lm-head"><span class="lm-badge">05</span><h3>Сайт с нуля без кода</h3></div>
+      <div class="ssub">6 шагов: от «насмотрелся» до живой ссылки</div>
+      <div class="quote">Ты не изобретаешь дизайн с нуля. Берёшь то, что уже работает, разбираешь почему — и собираешь своё.</div>
+      <ul>
+        <li><b>1 · Насмотренность</b> — собери 10–20 референсов. Где смотреть: Godly, reactbits.dev, Land-book, Awwwards.</li>
+        <li><b>2 · Разбор</b> — раздели каждый на сетку, типографику, отступы, цвет, анимации.</li>
+        <li><b>3 · Источник</b> — большую часть не нужно делать руками: готовые блоки на 21st.dev, Magic UI, Vercel templates.</li>
+        <li><b>4 · Адаптация</b> — чужой каркас + твой смысл. Подставь оффер, поменяй цвета/шрифты, убери лишнее.</li>
+        <li><b>5 · Сборка через ИИ</b> — грамотный промт из 6 блоков: контекст, стиль, структура, референс, тех. рамки, самопроверка.</li>
+        <li><b>6 · Deploy</b> — Vercel/Netlify бесплатно: перетащил папку → получил ссылку.</li>
+      </ul>
+      <figure class="infographic"><img src="img/site-howto.png" alt="Как сделать сайт — простая схема из 3 шагов" loading="lazy" onclick="zoomImg(this)"></figure>
+      <p class="infocap">Готовая схема: вдохновляйся → копируй → делай. Нажми, чтобы увеличить.</p>
+      <div class="quote">Первый сайт собери быстрым путём — чтобы увидеть результат. Со второго иди медленным, ради навыка.</div>
+      <div class="offer">
+        <div class="tag">Интенсив</div>
+        <p>Застрял на запуске? За <b>неделю интенсива</b> разберёшься по шагам и будешь <b>сам собирать сайты и любые нужные автоматизации под свой запрос</b>.</p>
+        <a class="btn btn-primary" onclick="goOffer()">Узнать программу →</a>
+      </div>
+    </section>
+  </div>
+    <div class="offer" style="margin-top:26px">
+      <div class="tag">Бесплатно</div>
+      <p>Забери бесплатный набор: файл с <b>13 нишами</b>, примерами автоматизации <b>114 бизнес-процессов</b> и <b>88 проверенных AI-сервисов</b> с ценами и форматом «было → стало», плюс два аудиоурока и доступ в закрытое сообщество на месяц.</p>
+      <a class="btn btn-primary" onclick="goOffer()">Забрать бесплатные материалы →</a>
+    </div>
+  </div><!-- /page-library -->
+
+  <!-- страница оффера переехала на отдельный /funnel/offer -->
+
+</div>
+
+<div class="lightbox" id="lightbox">
+  <button class="lx-close" onclick="closeZoom()">✕</button>
+  <img id="lightbox-img" src="" alt="">
+  <div class="lx-hint">разводи пальцами, чтобы увеличить · двойной тап · ✕ или фон, чтобы закрыть</div>
+</div>
+
+<script>
+  // ─── Telegram Mini App SDK ────────────────────────────────────────────────
+  var TG = (window.Telegram && window.Telegram.WebApp) ? window.Telegram.WebApp : null;
+  if (TG) { try { TG.ready(); TG.expand(); } catch(e){} }
+
+  // Кнопки «Забрать материалы» / «Забронировать место» → ведут в бота клуба
+  // @ai47club_bot с автозапуском /start и меткой источника «site».
+  var CLUB_LINK = 'https://t.me/ai47club_bot?start=site';
+  function openClub(){
+    if (TG && typeof TG.openTelegramLink === 'function') { TG.openTelegramLink(CLUB_LINK); }
+    else { window.open(CLUB_LINK, '_blank'); }
+  }
+  function getMaterial(){ openClub(); }
+  function bookSpot(){ openClub(); }
+
+  // Лайтбокс с зумом пальцами: пинч (2 пальца), панорама (1 палец при увеличении),
+  // двойной тап = приблизить/сбросить. Работает даже при user-scalable=no.
+  var LB=document.getElementById('lightbox'), LBI=document.getElementById('lightbox-img');
+  var lbScale=1, lbTx=0, lbTy=0;
+  var pStartDist=0, pStartScale=1, pStartX=0, pStartY=0, pStartTx=0, pStartTy=0, pMode=null, pMoved=false, pLastTap=0;
+  function lbApply(anim){
+    LBI.style.transition = anim ? 'transform .25s ease' : 'none';
+    LBI.style.transform = 'translate('+lbTx+'px,'+lbTy+'px) scale('+lbScale+')';
+  }
+  function lbReset(anim){ lbScale=1; lbTx=0; lbTy=0; lbApply(anim); }
+  function zoomImg(img){
+    LBI.src = img.src;
+    lbReset(false);
+    LB.classList.add('on');
+    document.body.style.overflow='hidden';
+  }
+  function closeZoom(){
+    LB.classList.remove('on');
+    document.body.style.overflow='';
+    lbReset(false);
+  }
+  function lbDist(t){ return Math.hypot(t[0].clientX-t[1].clientX, t[0].clientY-t[1].clientY); }
+  if(LBI){
+    LBI.addEventListener('touchstart',function(e){
+      pMoved=false;
+      if(e.touches.length===2){ pMode='pinch'; pStartDist=lbDist(e.touches); pStartScale=lbScale; }
+      else { pMode='drag'; pStartX=e.touches[0].clientX; pStartY=e.touches[0].clientY; pStartTx=lbTx; pStartTy=lbTy; }
+    },{passive:false});
+    LBI.addEventListener('touchmove',function(e){
+      if(pMode==='pinch' && e.touches.length===2){
+        e.preventDefault(); pMoved=true;
+        lbScale=Math.min(5, Math.max(1, pStartScale*(lbDist(e.touches)/pStartDist)));
+        lbApply(false);
+      } else if(pMode==='drag' && e.touches.length===1){
+        var dx=e.touches[0].clientX-pStartX, dy=e.touches[0].clientY-pStartY;
+        if(Math.abs(dx)>6||Math.abs(dy)>6) pMoved=true;
+        if(lbScale>1){ e.preventDefault(); lbTx=pStartTx+dx; lbTy=pStartTy+dy; lbApply(false); }
+      }
+    },{passive:false});
+    LBI.addEventListener('touchend',function(e){
+      if(e.touches.length>0) return;
+      if(lbScale<1.02) lbReset(true);
+      if(!pMoved){
+        var now=Date.now();
+        if(now-pLastTap<300){ // двойной тап
+          if(lbScale>1) lbReset(true); else { lbScale=2.5; lbApply(true); }
+          pLastTap=0;
+        } else pLastTap=now;
+      }
+      pMode=null;
+    });
+    // десктоп: колесо — зум, двойной клик — тумблер
+    LBI.addEventListener('dblclick',function(e){ e.preventDefault(); if(lbScale>1) lbReset(true); else { lbScale=2.5; lbApply(true); } });
+    LBI.addEventListener('wheel',function(e){ e.preventDefault(); lbScale=Math.min(5,Math.max(1, lbScale - e.deltaY*0.002)); if(lbScale<=1){lbTx=0;lbTy=0;} lbApply(false); },{passive:false});
+  }
+  // тап по фону (не по фото) — закрыть
+  if(LB) LB.addEventListener('click',function(e){ if(e.target===LB || (e.target.classList&&e.target.classList.contains('lx-hint'))) closeZoom(); });
+  function closeDrops(){ document.querySelectorAll('.navitem.open').forEach(i=>i.classList.remove('open')); }
+  function toggleDrop(btn){
+    const item=btn.closest('.navitem');
+    const wasOpen=item.classList.contains('open');
+    closeDrops();
+    if(!wasOpen) item.classList.add('open');
+    event.stopPropagation();
+  }
+  document.addEventListener('click',closeDrops);
+  function showView(which){
+    document.getElementById('home').style.display = which==='home'?'block':'none';
+    document.getElementById('page-library').classList.toggle('show', which==='library');
+    window.scrollTo({top:0,behavior:'instant'});
+    closeDrops();
+  }
+  function goHome(){ showView('home'); }
+  function goOffer(){ window.location.href = 'offer'; }
+  function openArticle(section, anchor){
+    // все разделы теперь на одной странице «Библиотека»; anchor может быть в section или отдельным
+    showView('library');
+    var target = anchor || section;
+    if(target){ setTimeout(()=>{ const el=document.getElementById(target); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); },80); }
+  }
+  function copyPrompt(btn){
+    const pre=btn.closest('.codewrap').querySelector('pre');
+    const txt=pre.innerText;
+    navigator.clipboard.writeText(txt).then(()=>{
+      const old=btn.textContent; btn.textContent='Скопировано ✓';
+      setTimeout(()=>btn.textContent=old,1500);
+    }).catch(()=>{ btn.textContent='Выдели и скопируй вручную'; });
+  }
+  // горизонтальный слайдер: точки-индикаторы
+  (function initSlider(){
+    const track=document.getElementById('htrack');
+    const dotsBox=document.getElementById('hdots');
+    if(!track||!dotsBox) return;
+    const slides=[...track.querySelectorAll('.hslide')];
+    slides.forEach((s,i)=>{
+      const b=document.createElement('button');
+      if(i===0) b.classList.add('on');
+      b.setAttribute('aria-label','Слайд '+(i+1));
+      b.onclick=()=>{ slides[i].scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'}); };
+      dotsBox.appendChild(b);
+    });
+    const dots=[...dotsBox.children];
+    let raf;
+    track.addEventListener('scroll',()=>{
+      cancelAnimationFrame(raf);
+      raf=requestAnimationFrame(()=>{
+        const c=track.scrollLeft+track.clientWidth/2;
+        let best=0,bd=Infinity;
+        slides.forEach((s,i)=>{
+          const mid=s.offsetLeft+s.offsetWidth/2;
+          const d=Math.abs(mid-c);
+          if(d<bd){bd=d;best=i;}
+        });
+        dots.forEach((d,i)=>d.classList.toggle('on',i===best));
+      });
+    },{passive:true});
+  })();
+
+  // слайдеры картинок (наборы фото из папки): точки-индикаторы
+  (function initImgSliders(){
+    document.querySelectorAll('.imgslider').forEach(slider=>{
+      const track=slider.querySelector('.imgtrack');
+      const dotsBox=slider.querySelector('.imgdots');
+      if(!track||!dotsBox) return;
+      const slides=[...track.querySelectorAll('.imgslide')];
+      if(slides.length<2){ dotsBox.style.display='none'; return; }
+      slides.forEach((s,i)=>{
+        const b=document.createElement('button');
+        if(i===0) b.classList.add('on');
+        b.setAttribute('aria-label','Слайд '+(i+1));
+        b.onclick=()=>{ slides[i].scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'}); };
+        dotsBox.appendChild(b);
+      });
+      const dots=[...dotsBox.children];
+      let raf;
+      track.addEventListener('scroll',()=>{
+        cancelAnimationFrame(raf);
+        raf=requestAnimationFrame(()=>{
+          const c=track.scrollLeft+track.clientWidth/2;
+          let best=0,bd=Infinity;
+          slides.forEach((s,i)=>{
+            const mid=s.offsetLeft+s.offsetWidth/2;
+            const d=Math.abs(mid-c);
+            if(d<bd){bd=d;best=i;}
+          });
+          dots.forEach((d,i)=>d.classList.toggle('on',i===best));
+        });
+      },{passive:true});
+    });
+  })();
+
+  // оффер: коверфлоу-слайдер программы (порт CircularTestimonials на ванильный JS)
+  // слайдер оффера теперь на отдельной странице /funnel/offer
+
+  // Космический фон тянется на всю высоту страницы, а не только на экран.
+  // Пересчитываем при загрузке, ресайзе и смене экрана (SPA переключает вид).
+  (function initPageHeight(){
+    function apply(){
+      var h = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight, window.innerHeight);
+      document.documentElement.style.setProperty('--page-height', h + 'px');
+    }
+    apply();
+    window.addEventListener('load', apply);
+    window.addEventListener('resize', apply);
+    // вид переключается через showView / раскрытие <details> — ловим изменения DOM
+    if (window.ResizeObserver) { new ResizeObserver(apply).observe(document.body); }
+    document.addEventListener('click', function(){ setTimeout(apply, 120); });
+  })();
+</script>
+</body>
+</html>
