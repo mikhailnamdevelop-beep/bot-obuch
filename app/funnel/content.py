@@ -14,7 +14,7 @@ from app.funnel import bot
 # он ответит строкой вида "file_id (voice): AAA..." или "file_id (audio): BBB...".
 # Скопируй file_id сюда и поставь KIND = тот тип, что бот назвал ("voice" или "audio").
 # Пока file_id пустой — вместо аудио уходит текст-заглушка.
-AUDIO_1_FILE_ID = ""      # первый материал (после кнопки «Получить материалы»)
+AUDIO_1_FILE_ID = "AwACAgUAAxkBAAICj2qZTHitc-p9FopHJH_FG2DWZePEAAKbKQACEPPRVI2LC94-QDqiPQQ"      # первый материал (после кнопки «Получить материалы»)
 AUDIO_1_KIND = "voice"    # "voice" — голосовое, "audio" — mp3/аудио-файл
 AUDIO_2_FILE_ID = ""      # второй материал (после «Забрать материалы» в оффере)
 AUDIO_2_KIND = "voice"
