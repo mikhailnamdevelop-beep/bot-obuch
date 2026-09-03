@@ -1178,7 +1178,7 @@ ITERATE (Итерация): [как буду уточнять]</pre>
     </div>
   </div><!-- /page-library -->
 
-  <!-- страница оффера переехала на отдельный /funnel/offer -->
+  <!-- публичная страница оффера открывается как секция /funnel/web#offer -->
 
 </div>
 
@@ -1276,7 +1276,7 @@ ITERATE (Итерация): [как буду уточнять]</pre>
     closeDrops();
   }
   function goHome(){ showView('home'); }
-  function goOffer(){ window.location.href = 'offer'; }
+  function goOffer(){ window.location.href = 'web#offer'; }
   function openArticle(section, anchor){
     // все разделы теперь на одной странице «Библиотека»; anchor может быть в section или отдельным
     showView('library');
@@ -1355,7 +1355,7 @@ ITERATE (Итерация): [как буду уточнять]</pre>
   })();
 
   // оффер: коверфлоу-слайдер программы (порт CircularTestimonials на ванильный JS)
-  // слайдер оффера теперь на отдельной странице /funnel/offer
+  // слайдер оффера теперь на публичной странице /funnel/web#offer
 
   // Космический фон тянется на всю высоту страницы, а не только на экран.
   // Пересчитываем при загрузке, ресайзе и смене экрана (SPA переключает вид).

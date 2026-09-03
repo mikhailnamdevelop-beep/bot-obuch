@@ -18,6 +18,7 @@ from app.routes.funnel import router as funnel_router
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("funnel")
+logging.getLogger("httpx").setLevel(logging.WARNING)
 
 
 @asynccontextmanager
